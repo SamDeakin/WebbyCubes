@@ -109,15 +109,15 @@ class cubeRenderPass extends RenderPass {
 
         // Half size and translate to be in range 0-1
         this.modelData = mat4.create()
-        mat4.multiplyScalar(
-            this.modelData,
-            this.modelData,
-            0.5
-        )
         mat4.translate(
             this.modelData,
             this.modelData,
-            [0.5, 0.5, 0.5],
+            [1, 1, 1],
+        )
+        mat4.multiplyScalar(
+            this.modelData,
+            this.modelData,
+            0.5,
         )
     }
 
@@ -217,6 +217,7 @@ export default class glCanvas {
         this.canvas.width = this.width
         this.height = this.canvas.clientHeight
         this.canvas.height = this.height
+        this.gl.viewport(0, 0, this.width, this.height)
     }
 
     setupView() {
@@ -226,10 +227,10 @@ export default class glCanvas {
         this.resetSize()
 
         this.viewMatrix = mat4.create()
-        mat4.targetTo(
+        mat4.lookAt(
             this.viewMatrix, // Data destination
-            [0.0, 0.0, -5.0], // Position
-            [0.0, 0.0, 0.0], // Forward
+            [0.0, 0.0, 5.0], // Position
+            [0.0, 0.0, 0.0], // target
             [0.0, 1.0, 0.0], // Up
         )
 
