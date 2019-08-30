@@ -1,5 +1,3 @@
-"use strict"
-
 class cube {
     constructor(pos, colour) {
         this.pos = pos
@@ -15,4 +13,9 @@ class world {
     get packedData() {
         return undefined // TODO
     }
+}
+
+export {
+    cube,
+    world,
 }
