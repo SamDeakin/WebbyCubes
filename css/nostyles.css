@@ -1,0 +1,11 @@
+/*
+ * This file contains just styles related to sizing the canvas and removing default web styles.
+ */
+
+#main, html, body {
+    margin: 0px;
+    height: 100%;
+    min-height: 100%;
+    width: 100%;
+    min-width: 100%;
+}
