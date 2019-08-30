@@ -1,16 +1,73 @@
 "use strict"
 
-function makeCanvas() {
-    const canvas = document.querySelector("#main")
-    const gl = canvas.getContext("webgl")
+const cube = [
+    // Front face
+    -1.0, -1.0,  1.0,
+    1.0, -1.0,  1.0,
+    1.0,  1.0,  1.0,
+    -1.0,  1.0,  1.0,
 
-    if (gl == null) {
-        alert(":(")
-        return
+    // Back face
+    -1.0, -1.0, -1.0,
+    -1.0,  1.0, -1.0,
+    1.0,  1.0, -1.0,
+    1.0, -1.0, -1.0,
+
+    // Top face
+    -1.0,  1.0, -1.0,
+    -1.0,  1.0,  1.0,
+    1.0,  1.0,  1.0,
+    1.0,  1.0, -1.0,
+
+    // Bottom face
+    -1.0, -1.0, -1.0,
+    1.0, -1.0, -1.0,
+    1.0, -1.0,  1.0,
+    -1.0, -1.0,  1.0,
+
+    // Right face
+    1.0, -1.0, -1.0,
+    1.0,  1.0, -1.0,
+    1.0,  1.0,  1.0,
+    1.0, -1.0,  1.0,
+
+    // Left face
+    -1.0, -1.0, -1.0,
+    -1.0, -1.0,  1.0,
+    -1.0,  1.0,  1.0,
+    -1.0,  1.0, -1.0,
+]
+
+class glCanvas {
+    constructor() {
+        this.canvas = document.querySelector("#main")
+        this.gl = this.canvas.getContext("webgl")
+
+        if (this.gl == null) {
+            alert(":(")
+            return
+        }
+
+        this.gl.clearColor(0.0, 0.0, 0.0, 1.0)
+        this.gl.clear(this.gl.COLOR_BUFFER_BIT)
+
+        let last = performance.now()
+        let _this = this
+        function render(now) {
+            let delta = now - last
+            last = now
+
+            _this.render(now, delta)
+
+            requestAnimationFrame(render)
+        }
+
+        requestAnimationFrame(render)
     }
 
-    gl.clearColor(0.0, 0.0, 0.0, 1.0)
-    gl.clear(gl.COLOR_BUFFER_BIT)
+    render(now, delta) {
+
+    }
 }
 
-makeCanvas()
+const canvas = new glCanvas()
