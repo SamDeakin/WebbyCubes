@@ -30,8 +30,8 @@ export default class GLCanvas {
             // Set up tracking so we can filter mouseup and mousemove into drag and click
             mouse.held = true
             mouse.click = true
-            mouse.x = e.x
-            mouse.y = e.y
+            mouse.x = e.clientX
+            mouse.y = e.clientY
             mouse.dx = 0
             mouse.dy = 0
             mouse.netdx = 0
@@ -52,17 +52,17 @@ export default class GLCanvas {
             }
 
             // Skip this event if the mouse didn't actually move
-            if (e.x == mouse.x && e.y == mouse.y) {
+            if (e.clientX == mouse.x && e.clientY == mouse.y) {
                 return
             }
 
-            mouse.netdx += Math.abs(e.x - mouse.x)
-            mouse.netdy += Math.abs(e.y - mouse.y)
-            mouse.dx += e.x - mouse.x
-            mouse.dy += e.y - mouse.y
+            mouse.netdx += Math.abs(e.clientX - mouse.x)
+            mouse.netdy += Math.abs(e.clientY - mouse.y)
+            mouse.dx += e.clientX - mouse.x
+            mouse.dy += e.clientY - mouse.y
 
-            mouse.x = e.x
-            mouse.y = e.y
+            mouse.x = e.clientX
+            mouse.y = e.clientY
 
             // Return if we are under the threshold
             if (mouse.netdx + mouse.netdy < MouseMoveThreshold) {
@@ -73,6 +73,28 @@ export default class GLCanvas {
             _this.mouseDragged(mouse.x, mouse.y, mouse.dx, mouse.dy)
             mouse.dx = 0
             mouse.dy = 0
+        }, false)
+
+        // Set up touch events for mobile
+        this.canvas.addEventListener("touchstart", (e) => {
+            var touch = e.touches[0]
+            var mouseEvent = new MouseEvent("mousedown", {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+            })
+            _this.canvas.dispatchEvent(mouseEvent)
+        }, false)
+        this.canvas.addEventListener("touchend", function (e) {
+            var mouseEvent = new MouseEvent("mouseup", {})
+            _this.canvas.dispatchEvent(mouseEvent)
+        }, false)
+        this.canvas.addEventListener("touchmove", function (e) {
+            var touch = e.touches[0]
+            var mouseEvent = new MouseEvent("mousemove", {
+                clientX: touch.clientX,
+                clientY: touch.clientY,
+            })
+            _this.canvas.dispatchEvent(mouseEvent)
         }, false)
 
         this.gl = this.canvas.getContext("webgl2")
