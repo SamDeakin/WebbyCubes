@@ -1,11 +1,62 @@
 import { cube, world } from "./cubes.js"
 import { cubeRenderPass } from "./renderpass.js"
 
+const MouseMoveThreshold = 5 // 5px min to count as move instead of click
+
 export default class glCanvas {
     constructor() {
         this.canvas = document.querySelector("#main")
         this.width = 0
         this.height = 0
+
+        let _this = this
+        let mouse = {
+            x: 0,
+            y: 0,
+            dx: 0,
+            dy: 0,
+            held: false,
+            click: false,
+        }
+        this.canvas.addEventListener('mousedown', (e) => {
+            // Set up tracking so we can filter mouseup and mousemove into drag and click
+            mouse.held = true
+            mouse.click = true
+            mouse.x = e.x
+            mouse.y = e.y
+            mouse.dx = 0
+            mouse.dy = 0
+        }, false)
+        this.canvas.addEventListener('mouseup', (e) => {
+            mouse.held = false
+            if (mouse.click) {
+                _this.mouseClicked(mouse.x, mouse.y)
+            }
+        }, false)
+        this.canvas.addEventListener('mousemove', (e) => {
+            if (!mouse.held) {
+                return
+            }
+
+            // Skip this event if the mouse didn't actually move
+            if (e.x == mouse.x && e.y == mouse.y) {
+                return
+            }
+
+            mouse.dx += Math.abs(e.x - mouse.x)
+            mouse.dy += Math.abs(e.y - mouse.y)
+            mouse.x = e.x
+            mouse.y = e.y
+
+            // Return if we are under the threshold
+            if (mouse.click && mouse.dx + mouse.dy < MouseMoveThreshold) {
+                return
+            }
+
+            _this.mouseDragged(mouse.x, mouse.y, mouse.dx, mouse.dy)
+            mouse.dx = 0
+            mouse.dy = 0
+        }, false)
 
         this.gl = this.canvas.getContext("webgl2")
 
@@ -145,5 +196,14 @@ export default class glCanvas {
         }
 
         requestAnimationFrame(render)
+    }
+
+    /// Event handling functions
+    mouseClicked(x, y) {
+        console.log("click", x, y)
+    }
+
+    mouseDragged(x, y, dx, dy) {
+        console.log("move", x, y, dx, dy)
     }
 }
