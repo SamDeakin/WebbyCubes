@@ -1,11 +1,11 @@
-class cube {
+class Cube {
     constructor(pos, colour) {
         this.pos = pos
         this.colour = colour
     }
 }
 
-class world {
+class World {
     constructor() {
         this.cubes = []
     }
@@ -16,6 +16,6 @@ class world {
 }
 
 export {
-    cube,
-    world,
+    Cube,
+    World,
 }

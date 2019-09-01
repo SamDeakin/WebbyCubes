@@ -1,13 +1,21 @@
-import { cube, world } from "./cubes.js"
-import { cubeRenderPass } from "./renderpass.js"
+import { Cube, World } from "./cubes.js"
+import { CubeRenderPass } from "./renderpass.js"
+import { Camera } from "./camera.js"
 
 const MouseMoveThreshold = 5 // 5px min to count as move instead of click
 
-export default class glCanvas {
+export default class GLCanvas {
     constructor() {
         this.canvas = document.querySelector("#main")
         this.width = 0
         this.height = 0
+
+        this.camera = new Camera(
+            [0, 0, 5],
+            [0, 0, 0],
+            this.width,
+            this.height,
+        )
 
         let _this = this
         let mouse = {
@@ -26,6 +34,8 @@ export default class glCanvas {
             mouse.y = e.y
             mouse.dx = 0
             mouse.dy = 0
+            mouse.netdx = 0
+            mouse.netdy = 0
         }, false)
         this.canvas.addEventListener('mouseup', (e) => {
             mouse.held = false
@@ -33,6 +43,9 @@ export default class glCanvas {
                 _this.mouseClicked(mouse.x, mouse.y)
             }
         }, false)
+        this.canvas.addEventListener('mouseleave', (e) => {
+            mouse.held = false
+        })
         this.canvas.addEventListener('mousemove', (e) => {
             if (!mouse.held) {
                 return
@@ -43,16 +56,20 @@ export default class glCanvas {
                 return
             }
 
-            mouse.dx += Math.abs(e.x - mouse.x)
-            mouse.dy += Math.abs(e.y - mouse.y)
+            mouse.netdx += Math.abs(e.x - mouse.x)
+            mouse.netdy += Math.abs(e.y - mouse.y)
+            mouse.dx += e.x - mouse.x
+            mouse.dy += e.y - mouse.y
+
             mouse.x = e.x
             mouse.y = e.y
 
             // Return if we are under the threshold
-            if (mouse.click && mouse.dx + mouse.dy < MouseMoveThreshold) {
+            if (mouse.netdx + mouse.netdy < MouseMoveThreshold) {
                 return
             }
 
+            mouse.click = false
             _this.mouseDragged(mouse.x, mouse.y, mouse.dx, mouse.dy)
             mouse.dx = 0
             mouse.dy = 0
@@ -72,6 +89,9 @@ export default class glCanvas {
         // Rerun this every frame because the user may have resized the window and canvas
         this.setupView()
 
+        let perspectiveMatrix = this.camera.perspective
+        let viewMatrix = this.camera.view
+
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0); // Clear to black, fully opaque
         this.gl.clearDepth(1.0); // Clear everything
         this.gl.enable(this.gl.DEPTH_TEST); // Enable depth testing
@@ -80,7 +100,7 @@ export default class glCanvas {
         // Clear the canvas before we start drawing on it.
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
 
-        this.cubeRenderPass.run(now, delta, this.viewMatrix, this.projectionMatrix)
+        this.cubeRenderPass.run(now, delta, viewMatrix, perspectiveMatrix)
     }
 
     loadData() {
@@ -134,7 +154,7 @@ export default class glCanvas {
             worldLocation: this.gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
             modelLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
             viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
-            projectionLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_projection'),
+            perspectiveLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),
         }
     }
 
@@ -144,6 +164,7 @@ export default class glCanvas {
         this.height = this.canvas.clientHeight
         this.canvas.height = this.height
         this.gl.viewport(0, 0, this.width, this.height)
+        this.camera.generatePerspective(this.width, this.height)
     }
 
     setupView() {
@@ -151,23 +172,6 @@ export default class glCanvas {
             return
         }
         this.resetSize()
-
-        this.viewMatrix = mat4.create()
-        mat4.lookAt(
-            this.viewMatrix, // Data destination
-            [0.0, 0.0, 5.0], // Position
-            [0.0, 0.0, 0.0], // target
-            [0.0, 1.0, 0.0], // Up
-        )
-
-        this.projectionMatrix = mat4.create()
-        mat4.perspective(
-            this.projectionMatrix,
-            45.0 * Math.PI / 180.0, // Vertical FOV in radians
-            this.width / this.height, // Aspect ratio
-            0.1, // Near plane
-            100.0, // Far plane
-        )
     }
 
     beginRender() {
@@ -177,11 +181,9 @@ export default class glCanvas {
         this.createPrograms()
         this.setupView()
 
-        this.cubeRenderPass = new cubeRenderPass(
+        this.cubeRenderPass = new CubeRenderPass(
             this.gl,
             this.cubeShaderProgramInfo,
-            this.viewMatrix,
-            this.projectionMatrix,
         )
 
         let last = performance.now()
@@ -200,10 +202,11 @@ export default class glCanvas {
 
     /// Event handling functions
     mouseClicked(x, y) {
-        console.log("click", x, y)
+        // Intentionally empty for now
     }
 
     mouseDragged(x, y, dx, dy) {
-        console.log("move", x, y, dx, dy)
+        this.camera.dragHorizontal(dx)
+        this.camera.dragVertical(dy)
     }
 }

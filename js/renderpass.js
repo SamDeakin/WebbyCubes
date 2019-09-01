@@ -52,7 +52,7 @@ class RenderPass {
         this.shaderProgramInfo = shaderProgramInfo
     }
 
-    run(now, delta, viewData, projectionData) {
+    run(now, delta, viewData, perspectiveData) {
         this.gl.useProgram(this.shaderProgramInfo.program)
 
         this.bindGLData()
@@ -68,9 +68,9 @@ class RenderPass {
             viewData,
         )
         this.projectionUniform = this.gl.uniformMatrix4fv(
-            this.shaderProgramInfo.projectionLocation,
+            this.shaderProgramInfo.perspectiveLocation,
             false,
-            projectionData,
+            perspectiveData,
         )
 
         this.gl.drawElementsInstanced(
@@ -85,7 +85,7 @@ class RenderPass {
     }
 }
 
-export class cubeRenderPass extends RenderPass {
+export class CubeRenderPass extends RenderPass {
     constructor(gl, shaderProgramInfo) {
         super(gl, shaderProgramInfo)
 

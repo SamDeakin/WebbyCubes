@@ -1,3 +1,3 @@
-import glCanvas from './js/canvas.js';
+import GLCanvas from './js/canvas.js';
 
-const canvas = new glCanvas();
+const canvas = new GLCanvas();
