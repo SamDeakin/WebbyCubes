@@ -3,6 +3,7 @@ import { CubeRenderPass } from "./renderpass.js"
 import { Camera } from "./camera.js"
 
 const MouseMoveThreshold = 5 // 5px min to count as move instead of click
+const MouseComboMoveThreshold = 0.7 // If >x% of movement is in x or y axis then lock to just that type of dragging
 
 export default class GLCanvas {
     constructor() {
@@ -11,8 +12,8 @@ export default class GLCanvas {
         this.height = 0
 
         this.camera = new Camera(
-            [0, 0, 5],
-            [0, 0, 0],
+            [0, 1, 5],
+            [0, 1, 0],
             this.width,
             this.height,
         )
@@ -23,8 +24,12 @@ export default class GLCanvas {
             y: 0,
             dx: 0,
             dy: 0,
+            netdx: 0,
+            netdy: 0,
             held: false,
             click: false,
+            draggingX: false,
+            draggingY: false,
         }
         this.canvas.addEventListener('mousedown', (e) => {
             // Set up tracking so we can filter mouseup and mousemove into drag and click
@@ -36,6 +41,8 @@ export default class GLCanvas {
             mouse.dy = 0
             mouse.netdx = 0
             mouse.netdy = 0
+            mouse.draggingX = false
+            mouse.draggingY = false
         }, false)
         this.canvas.addEventListener('mouseup', (e) => {
             mouse.held = false
@@ -69,8 +76,25 @@ export default class GLCanvas {
                 return
             }
 
+            if (!mouse.draggingX && !mouse.draggingY) {
+                const total = mouse.netdx + mouse.dy
+                if (mouse.netdx / total > MouseComboMoveThreshold) {
+                    mouse.draggingX = true
+                } else if (mouse.netdy / total > MouseComboMoveThreshold) {
+                    mouse.draggingY = true
+                } else {
+                    mouse.draggingX = true
+                    mouse.draggingY = true
+                }
+            }
+
             mouse.click = false
-            _this.mouseDragged(mouse.x, mouse.y, mouse.dx, mouse.dy)
+
+            if (mouse.draggingX)
+                _this.mouseDraggedX(mouse.x, mouse.dx)
+            if (mouse.draggingY)
+                _this.mouseDraggedY(mouse.y, mouse.dy)
+
             mouse.dx = 0
             mouse.dy = 0
         }, false)
@@ -244,8 +268,11 @@ export default class GLCanvas {
         // Intentionally empty for now
     }
 
-    mouseDragged(x, y, dx, dy) {
+    mouseDraggedX(x, dx) {
         this.camera.dragHorizontal(dx)
+    }
+
+    mouseDraggedY(y, dy) {
         this.camera.dragVertical(dy)
     }
 }

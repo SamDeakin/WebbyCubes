@@ -32,6 +32,12 @@ export class Camera {
             [0.0, 1.0, 0.0], // Up, always y direction
         )
 
+        mat4.translate(
+            out,
+            out,
+            [0.0, this.ascension, this.distance],
+        )
+
         mat4.rotate(
             out,
             out,
@@ -47,10 +53,11 @@ export class Camera {
     }
 
     dragVertical(dy) {
-
+        this.distance += dy * 0.005
+        this.ascension += dy * 0.002
     }
 
     dragHorizontal(dx) {
-        this.rotation += dx * 0.005
+        this.rotation += dx * 0.003
     }
 }
