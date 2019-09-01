@@ -97,6 +97,23 @@ export default class GLCanvas {
             _this.canvas.dispatchEvent(mouseEvent)
         }, false)
 
+        // Prevent scrolling when touching the canvas
+        document.body.addEventListener("touchstart", function (e) {
+            if (e.target == _this.canvas) {
+                e.preventDefault()
+            }
+        }, false)
+        document.body.addEventListener("touchend", function (e) {
+            if (e.target == _this.canvas) {
+                e.preventDefault()
+            }
+        }, false)
+        document.body.addEventListener("touchmove", function (e) {
+            if (e.target == _this.canvas) {
+                e.preventDefault()
+            }
+        }, false)
+
         this.gl = this.canvas.getContext("webgl2")
 
         if (this.gl == null) {
