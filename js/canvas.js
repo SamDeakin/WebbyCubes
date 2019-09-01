@@ -79,8 +79,10 @@ class RenderPass {
             this.numVertices, // Number of vertices per instance
             this.gl.UNSIGNED_SHORT, // Data format of the index buffer
             0, // Start at the beginning of the buffer
-            1, // TODO: Just the one cube for now
+            this.instanceCount, // Number of cubes to draw
         )
+
+        this.unbindGLData()
     }
 }
 
@@ -89,23 +91,11 @@ class cubeRenderPass extends RenderPass {
         super(gl, shaderProgramInfo)
 
         this.numVertices = 36
+        this.instanceCount = 1
 
         this.vertexBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(cubeData), this.gl.STATIC_DRAW);
-        this.gl.vertexAttribPointer(
-            this.shaderProgramInfo.vertex,
-            3, // 3 floats per vertex
-            this.gl.FLOAT, // Vertices are defined with floats
-            false, // Don't normalize
-            0, // No padding between vertices
-            0, // Start at the beginning of the buffer
-        )
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertex)
-
-        this.indexBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), this.gl.STATIC_DRAW);
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(cubeData), this.gl.STATIC_DRAW)
 
         // Half size and translate to be in range 0-1
         this.modelData = mat4.create()
@@ -119,11 +109,52 @@ class cubeRenderPass extends RenderPass {
             this.modelData,
             0.5,
         )
+
+        this.worldData = new Float32Array(mat4.create())
+        this.worldTransformBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.worldData), this.gl.DYNAMIC_DRAW, 0, 16)
+
+        this.indexBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), this.gl.STATIC_DRAW)
     }
 
     bindGLData() {
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
+        this.gl.vertexAttribPointer(
+            this.shaderProgramInfo.vertexLocation,
+            3, // 3 floats per vertex
+            this.gl.FLOAT, // Vertices are defined with floats
+            false, // Don't normalize
+            0, // No padding between vertices
+            0, // Start at the beginning of the buffer
+        )
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
+        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 0, 4, this.gl.FLOAT, false, 16, 0)
+        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 1, 4, this.gl.FLOAT, false, 16, 16)
+        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 2, 4, this.gl.FLOAT, false, 16, 32)
+        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 3, 4, this.gl.FLOAT, false, 16, 48)
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 0, 1)
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 1, 1)
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 2, 1)
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 3, 1)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+    }
+
+    unbindGLData() {
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
     }
 }
 
@@ -206,8 +237,9 @@ export default class glCanvas {
         this.cubeShaderProgramInfo = {
             program: this.cubeShaderProgram,
             vertexLocation: this.gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
+            worldLocation: this.gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
             modelLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
-            viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_world'),
+            viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
             projectionLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_projection'),
         }
     }
