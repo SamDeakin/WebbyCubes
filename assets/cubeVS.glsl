@@ -1,7 +1,7 @@
 #version 300 es
 
-in vec3 a_position;
-in mat4 a_world;
+layout(location = 0) in mat4 a_world;
+layout(location = 4) in vec3 a_position;
 
 uniform mat4 u_perspective;
 uniform mat4 u_view;

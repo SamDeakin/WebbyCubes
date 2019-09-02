@@ -46,6 +46,25 @@ const cubeIndices = [
     20, 21, 22,     20, 22, 23,   // left
 ];
 
+const quadData = [
+    -1, -1, 0,
+    -1, 1, 0,
+    1, -1, 0,
+    1, 1, 0,
+]
+
+const quadIndices = [
+    1, 0, 2, // Bottom left
+    3, 2, 1, // Top right
+]
+
+const quaduvs = [
+    0, 0,
+    0, 1,
+    1, 0,
+    1, 1,
+]
+
 class RenderPass {
     constructor(gl, shaderProgramInfo) {
         this.gl = gl
@@ -57,21 +76,27 @@ class RenderPass {
 
         this.bindGLData()
 
-        this.modelUniform = this.gl.uniformMatrix4fv(
-            this.shaderProgramInfo.modelLocation, // The uniform location
-            false, // Whether to transpose the mat4, but true is unsupported lol
-            this.modelData, // Initial uniform data
-        )
-        this.viewUniform = this.gl.uniformMatrix4fv(
-            this.shaderProgramInfo.viewLocation,
-            false,
-            viewData,
-        )
-        this.projectionUniform = this.gl.uniformMatrix4fv(
-            this.shaderProgramInfo.perspectiveLocation,
-            false,
-            perspectiveData,
-        )
+        if (this.shaderProgramInfo.modelLocation) {
+            this.modelUniform = this.gl.uniformMatrix4fv(
+                this.shaderProgramInfo.modelLocation, // The uniform location
+                false, // Whether to transpose the mat4, but true is unsupported lol
+                this.modelData, // Initial uniform data
+            )
+        }
+        if (this.shaderProgramInfo.viewLocation) {
+            this.viewUniform = this.gl.uniformMatrix4fv(
+                this.shaderProgramInfo.viewLocation,
+                false,
+                viewData,
+            )
+        }
+        if (this.shaderProgramInfo.perspectiveLocation) {
+            this.perspectiveUniform = this.gl.uniformMatrix4fv(
+                this.shaderProgramInfo.perspectiveLocation,
+                false,
+                perspectiveData,
+            )
+        }
 
         this.gl.drawElementsInstanced(
             this.gl.TRIANGLES, // Draw normal triangles
@@ -82,6 +107,10 @@ class RenderPass {
         )
 
         this.unbindGLData()
+
+        this.gl.useProgram(null)
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
     }
 }
 
@@ -154,5 +183,63 @@ export class CubeRenderPass extends RenderPass {
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+    }
+}
+
+export class QuadRenderPass extends RenderPass {
+    constructor(gl, shaderProgramInfo, quadTexture) {
+        super(gl, shaderProgramInfo)
+
+        this.quadTexture = quadTexture
+        this.numVertices = 6
+        this.instanceCount = 1
+
+        this.vertexBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(quadData), this.gl.STATIC_DRAW)
+
+        this.uvBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(quaduvs), this.gl.STATIC_DRAW)
+
+        this.indexBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(quadIndices), this.gl.STATIC_DRAW)
+
+        // TODO Setup texture
+    }
+
+    bindGLData() {
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
+        this.gl.vertexAttribPointer(
+            this.shaderProgramInfo.vertexLocation,
+            3, // 3 floats per vertex
+            this.gl.FLOAT, // Vertices are defined with floats
+            false, // Don't normalize
+            0, // No padding between vertices
+            0, // Start at the beginning of the buffer
+        )
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer)
+        this.gl.vertexAttribPointer(
+            this.shaderProgramInfo.uvLocation,
+            2,
+            this.gl.FLOAT,
+            false,
+            0,
+            0,
+        )
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.uvLocation)
+
+        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+
+        // TODO Bind texture
+    }
+
+    unbindGLData() {
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
+        // TODO Unbind texture
     }
 }
