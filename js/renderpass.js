@@ -158,6 +158,7 @@ export class CubeRenderPass extends RenderPass {
             0, // No padding between vertices
             0, // Start at the beginning of the buffer
         )
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
         this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
@@ -219,6 +220,7 @@ export class QuadRenderPass extends RenderPass {
             0, // No padding between vertices
             0, // Start at the beginning of the buffer
         )
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
         this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer)
@@ -230,6 +232,7 @@ export class QuadRenderPass extends RenderPass {
             0,
             0,
         )
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.uvLocation, 0)
         this.gl.enableVertexAttribArray(this.shaderProgramInfo.uvLocation)
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
