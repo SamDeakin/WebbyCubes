@@ -6,6 +6,8 @@ in vec2 texuv;
 
 out vec4 fragcolour;
 
+uniform sampler2D u_sampler;
+
 void main() {
-    fragcolour = vec4(texuv, 0.0, 1.0);
+    fragcolour = texture(u_sampler, texuv);
 }

@@ -155,12 +155,13 @@ export default class GLCanvas {
         let perspectiveMatrix = this.camera.perspective
         let viewMatrix = this.camera.view
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.gl.framebuffer)
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
 
         this.gl.clearColor(0.0, 0.0, 0.0, 1.0) // Clear to black, fully opaque
         this.gl.clearDepth(1.0) // Clear everything
         this.gl.enable(this.gl.DEPTH_TEST) // Enable depth testing
         this.gl.depthFunc(this.gl.LEQUAL) // Near things obscure far things
+        this.gl.viewport(0, 0, this.width, this.height)
 
         // Clear the canvas before we start drawing on it.
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
@@ -170,6 +171,7 @@ export default class GLCanvas {
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
 
         this.gl.disable(this.gl.DEPTH_TEST);
+        this.gl.viewport(0, 0, this.width, this.height)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
@@ -266,6 +268,7 @@ export default class GLCanvas {
             program: this.quadShaderProgram,
             vertexLocation: 0, // this.gl.getAttribLocation(this.quadShaderProgram, 'a_position'),
             uvLocation: 1, // this.gl.getAttribLocation(this.quadShaderProgram, 'a_uv'),
+            samperLocation: this.gl.getUniformLocation(this.quadShaderProgram, 'u_sampler'),
         }
     }
 
@@ -278,6 +281,8 @@ export default class GLCanvas {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameColourTexture)
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE)
         this.gl.framebufferTexture2D(
             this.gl.FRAMEBUFFER,
             this.gl.COLOR_ATTACHMENT0,
@@ -319,7 +324,8 @@ export default class GLCanvas {
         this.camera.generatePerspective(this.width, this.height)
 
         // Resize render buffers and storage
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameIDTexture)
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameColourTexture)
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0,
@@ -329,23 +335,23 @@ export default class GLCanvas {
             0,
             this.gl.RGBA,
             this.gl.UNSIGNED_BYTE,
-            new Uint8Array(this.width * this.height * 4), // We have to fill 4 components per texel still
-            0,
+            null,
         )
+
         this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.frameDepthBuffer)
         this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT24, this.width, this.height)
+
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameIDTexture)
         this.gl.texImage2D(
             this.gl.TEXTURE_2D,
             0, // LOD 0
-            this.gl.R16UI, // The texel format
+            this.gl.RGBA, // The texel format
             this.width,
             this.height,
             0, // Only borders of 0 width are supported
-            this.gl.RED_INTEGER, // Internal format and texel format are the same
-            this.gl.UNSIGNED_SHORT, // Internal texel format
-            new Uint16Array(this.width * this.height * 2), // Slow, but 0-fill it. I guess the packing is bad so we need x2
-            0, // Offset in the array
+            this.gl.RGBA, // Internal format and texel format are the same
+            this.gl.UNSIGNED_BYTE, // Internal texel format
+            null,
         )
     }
 

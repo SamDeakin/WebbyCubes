@@ -206,8 +206,6 @@ export class QuadRenderPass extends RenderPass {
         this.indexBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(quadIndices), this.gl.STATIC_DRAW)
-
-        // TODO Setup texture
     }
 
     bindGLData() {
@@ -237,12 +235,16 @@ export class QuadRenderPass extends RenderPass {
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
 
-        // TODO Bind texture
+        this.gl.activeTexture(this.gl.TEXTURE0)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.quadTexture)
+        this.gl.activeTexture(this.gl.TEXTURE0)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, this.quadTexture)
+        this.gl.uniform1i(this.shaderProgramInfo.samplerLocation, 0)
     }
 
     unbindGLData() {
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
-        // TODO Unbind texture
+        // this.gl.bindTexture(this.gl.TEXTURE_2D, null)
     }
 }
