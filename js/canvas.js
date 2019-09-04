@@ -231,6 +231,8 @@ export default class GLCanvas {
             program: this.cubeShaderProgram,
             vertexLocation: 4, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
             worldLocation: 0, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
+            cubeidLocation: 5, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
+            faceidLocation: 6, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
             modelLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
             viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
             perspectiveLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),
@@ -394,7 +396,12 @@ export default class GLCanvas {
 
     /// Event handling functions
     mouseClicked(x, y) {
-        // Intentionally empty for now
+        y = this.height - y // The texture is flipped vertically
+        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
+        this.gl.readBuffer(this.gl.COLOR_ATTACHMENT0)
+        let buf = new Uint8Array(4)
+        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buf)
+        console.log("Mouse!", x, y, buf)
     }
 
     mouseDraggedX(x, dx) {
