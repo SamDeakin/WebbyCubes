@@ -150,10 +150,8 @@ export class CubeRenderPass extends RenderPass {
             0.5,
         )
 
-        this.worldData = new Float32Array(mat4.create())
         this.worldTransformBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.worldData), this.gl.DYNAMIC_DRAW, 0, 16)
 
         this.indexBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
@@ -175,6 +173,27 @@ export class CubeRenderPass extends RenderPass {
             faceids[i * 4 + 3] = cubeSideIds[i] / 255
         }
         this.gl.bufferData(this.gl.ARRAY_BUFFER, faceids, this.gl.STATIC_DRAW)
+    }
+
+    resize(size, positions, colours) {
+        this.instanceCount = size
+
+        // Reset world positions
+        this.worldData = new Float32Array(size * 16)
+        // Fill worldData with matrix transforms for every position
+        for (let i = 0; i < size; i++) {
+            let transform = mat4.create()
+            mat4.fromTranslation(transform, positions[i])
+            for (let j = 0; j < 16; j++) {
+                this.worldData[i * 16 + j] = transform[j]
+            }
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.worldData, this.gl.DYNAMIC_DRAW, 0, 16)
+
+        // TODO Reset colours
+
+        // TODO Reset cube IDs
     }
 
     bindGLData() {

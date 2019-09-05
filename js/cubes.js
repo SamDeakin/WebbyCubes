@@ -7,11 +7,21 @@ class Cube {
 
 class World {
     constructor() {
-        this.cubes = []
+        this.cubes = [
+            new Cube(vec3.fromValues(0, 0, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+        ]
     }
 
-    get packedData() {
-        return undefined // TODO
+    get size() {
+        return this.cubes.length
+    }
+
+    get positions() {
+        return this.cubes.map(x => x.pos)
+    }
+
+    get colours() {
+        return this.cubes.map(x => x.colour)
     }
 }
 

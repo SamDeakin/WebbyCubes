@@ -1,4 +1,4 @@
-import { Cube, World } from "./cubes.js"
+import { World } from "./cubes.js"
 import { CubeRenderPass, QuadRenderPass } from "./renderpass.js"
 import { Camera } from "./camera.js"
 
@@ -381,9 +381,16 @@ export default class GLCanvas {
         this.createFramebuffer() // The FBO textures are resized by setupView() -> resetSize()
         this.setupView()
 
+        this.world = new World()
+
         this.cubeRenderPass = new CubeRenderPass(
             this.gl,
             this.cubeShaderProgramInfo,
+        )
+        this.cubeRenderPass.resize(
+            this.world.size,
+            this.world.positions,
+            this.world.colours,
         )
 
         this.quadRenderPass = new QuadRenderPass(
