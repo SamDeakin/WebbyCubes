@@ -28,6 +28,7 @@ class World {
 
     userTouched(idvec, face) {
         let id = DecodeIDs(idvec)
+        console.log("touch", id, face)
         // TODO, add or delete cubes
     }
 

@@ -419,9 +419,17 @@ export default class GLCanvas {
         y = this.height - y // The texture is flipped vertically
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
         this.gl.readBuffer(this.gl.COLOR_ATTACHMENT1)
+        
         let buf = new Uint8Array(4)
         this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buf)
-        console.log("Mouse!", x, y, buf)
+        
+        let idvec = vec3.create()
+        idvec[0] = buf[0]
+        idvec[1] = buf[1]
+        idvec[2] = buf[2]
+        let faceid = buf[3]
+
+        this.world.userTouched(idvec, faceid)
     }
 
     mouseDraggedX(x, dx) {
