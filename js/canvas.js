@@ -391,6 +391,7 @@ export default class GLCanvas {
             this.world.size,
             this.world.positions,
             this.world.colours,
+            this.world.ids,
         )
 
         this.quadRenderPass = new QuadRenderPass(

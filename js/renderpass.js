@@ -150,18 +150,13 @@ export class CubeRenderPass extends RenderPass {
             0.5,
         )
 
-        this.worldTransformBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
-
         this.indexBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
         this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), this.gl.STATIC_DRAW)
 
+        this.worldTransformBuffer = this.gl.createBuffer()
+        this.colourBuffer = this.gl.createBuffer()
         this.cubeidBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
-        // Test cube id data
-        let buf = new Float32Array([6/255, 120/255, 255/255])
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(buf), this.gl.DYNAMIC_DRAW)
 
         this.faceidBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.faceidBuffer)
@@ -175,7 +170,7 @@ export class CubeRenderPass extends RenderPass {
         this.gl.bufferData(this.gl.ARRAY_BUFFER, faceids, this.gl.STATIC_DRAW)
     }
 
-    resize(size, positions, colours) {
+    resize(size, positions, colours, ids) {
         this.instanceCount = size
 
         // Reset world positions
@@ -189,11 +184,28 @@ export class CubeRenderPass extends RenderPass {
             }
         }
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.worldData, this.gl.DYNAMIC_DRAW, 0, 16)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.worldData, this.gl.DYNAMIC_DRAW, 0)
 
-        // TODO Reset colours
+        // Reset colours
+        this.colourData = new Float32Array(size * 3)
+        for (let i = 0; i < size; i++) {
+            this.colourData[i * 3 + 0] = colours[i][0]
+            this.colourData[i * 3 + 1] = colours[i][1]
+            this.colourData[i * 3 + 2] = colours[i][2]
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.colourData, this.gl.DYNAMIC_DRAW, 0)
 
-        // TODO Reset cube IDs
+        // Reset cube IDs
+        // IDs are pre-transformed to a vec3 of uints for us
+        this.idData = new Float32Array(size * 3)
+        for (let i = 0; i < size; i++) {
+            this.idData[i * 3 + 0] = ids[i][0] / 255.0
+            this.idData[i * 3 + 1] = ids[i][1] / 255.0
+            this.idData[i * 3 + 2] = ids[i][2] / 255.0
+        }
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.idData, this.gl.DYNAMIC_DRAW, 0)
     }
 
     bindGLData() {
