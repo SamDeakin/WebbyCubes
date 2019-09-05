@@ -152,10 +152,10 @@ export class CubeRenderPass extends RenderPass {
             this.modelData,
             [1, 1, 1],
         )
-        mat4.multiplyScalar(
+        mat4.scale(
             this.modelData,
             this.modelData,
-            0.5,
+            [0.5, 0.5, 0.5],
         )
 
         this.indexBuffer = gl.createBuffer()
@@ -202,6 +202,7 @@ export class CubeRenderPass extends RenderPass {
                 this.worldData[i * 16 + j] = transform[j]
             }
         }
+        console.log(positions, this.worldData)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, this.worldData, gl.DYNAMIC_DRAW, 0)
 
@@ -241,10 +242,10 @@ export class CubeRenderPass extends RenderPass {
         gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
-        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 0, 4, gl.FLOAT, false, 16, 0)
-        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 1, 4, gl.FLOAT, false, 16, 16)
-        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 2, 4, gl.FLOAT, false, 16, 32)
-        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 3, 4, gl.FLOAT, false, 16, 48)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 0, 4, gl.FLOAT, false, 64, 0)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 1, 4, gl.FLOAT, false, 64, 16)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 2, 4, gl.FLOAT, false, 64, 32)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 3, 4, gl.FLOAT, false, 64, 48)
         gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 0, 1)
         gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 1, 1)
         gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 2, 1)

@@ -430,6 +430,14 @@ export default class GLCanvas {
         let faceid = buf[3]
 
         this.world.userTouched(idvec, faceid)
+
+        // Update render pass
+        this.cubeRenderPass.resize(
+            this.world.size,
+            this.world.positions,
+            this.world.colours,
+            this.world.ids,
+        )
     }
 
     mouseDraggedX(x, dx) {

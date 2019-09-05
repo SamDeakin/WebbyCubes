@@ -28,8 +28,43 @@ class World {
 
     userTouched(idvec, face) {
         let id = DecodeIDs(idvec)
-        console.log("touch", id, face)
-        // TODO, add or delete cubes
+        
+        if (face == 255)
+            return // Special not-drawn number (also the same as the colour alpha clear value)
+
+        // Determine the cube position
+        let touchedPos = this.cubes[id].pos
+        let newPos = [0, 0, 0]
+        newPos[0] += touchedPos[0]
+        newPos[1] += touchedPos[1]
+        newPos[2] += touchedPos[2]
+
+        // Add face contribution
+        switch(face) {
+        case 1: // front
+            newPos[2] += 1
+            break
+        case 2: // back
+            newPos[2] -= 1
+            break
+        case 3: // top
+            newPos[1] += 1
+            break
+        case 4: // bottom
+            newPos[1] -= 1
+            break
+        case 5: // right
+            newPos[0] += 1
+            break
+        case 6: // left
+            newPos[0] -= 1
+            break
+        }
+
+        this.cubes.push(new Cube(
+            vec3.fromValues(newPos[0], newPos[1], newPos[2]),
+            vec3.fromValues(1.0, 0.0, 1.0),
+        ))
     }
 
     get size() {
