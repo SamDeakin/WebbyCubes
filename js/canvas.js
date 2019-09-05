@@ -138,9 +138,9 @@ export default class GLCanvas {
             }
         }, false)
 
-        this.gl = this.canvas.getContext("webgl2")
+        window.gl = this.canvas.getContext("webgl2")
 
-        if (this.gl == null) {
+        if (gl == null) {
             alert(":(")
             return
         }
@@ -155,34 +155,34 @@ export default class GLCanvas {
         let perspectiveMatrix = this.camera.perspective
         let viewMatrix = this.camera.view
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
 
-        this.gl.clearColor(0.0, 0.0, 0.0, 1.0) // Clear to black, fully opaque
-        this.gl.clearDepth(1.0) // Clear everything
-        this.gl.enable(this.gl.DEPTH_TEST) // Enable depth testing
-        this.gl.depthFunc(this.gl.LEQUAL) // Near things obscure far things
-        this.gl.viewport(0, 0, this.width, this.height)
+        gl.clearColor(0.0, 0.0, 0.0, 1.0) // Clear to black, fully opaque
+        gl.clearDepth(1.0) // Clear everything
+        gl.enable(gl.DEPTH_TEST) // Enable depth testing
+        gl.depthFunc(gl.LEQUAL) // Near things obscure far things
+        gl.viewport(0, 0, this.width, this.height)
 
-        this.gl.drawBuffers([
-            this.gl.COLOR_ATTACHMENT0,
-            this.gl.COLOR_ATTACHMENT1,
+        gl.drawBuffers([
+            gl.COLOR_ATTACHMENT0,
+            gl.COLOR_ATTACHMENT1,
         ])
 
         // Clear the canvas before we start drawing on it.
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         this.cubeRenderPass.run(now, delta, viewMatrix, perspectiveMatrix)
 
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, null)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
-        this.gl.disable(this.gl.DEPTH_TEST);
-        this.gl.viewport(0, 0, this.width, this.height)
+        gl.disable(gl.DEPTH_TEST);
+        gl.viewport(0, 0, this.width, this.height)
 
-        this.gl.drawBuffers([
-            this.gl.BACK,
+        gl.drawBuffers([
+            gl.BACK,
         ])
 
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
         this.quadRenderPass.run(now, delta, viewMatrix, perspectiveMatrix)
@@ -209,123 +209,123 @@ export default class GLCanvas {
     }
 
     createPrograms() {
-        this.cubeVS = this.gl.createShader(this.gl.VERTEX_SHADER)
-        this.gl.shaderSource(this.cubeVS, this.cubeVSsource)
-        this.gl.compileShader(this.cubeVS)
+        this.cubeVS = gl.createShader(gl.VERTEX_SHADER)
+        gl.shaderSource(this.cubeVS, this.cubeVSsource)
+        gl.compileShader(this.cubeVS)
 
-        if (!this.gl.getShaderParameter(this.cubeVS, this.gl.COMPILE_STATUS)) {
-            console.log('Failed to compile shader cubeVS: ' + this.gl.getShaderInfoLog(this.cubeVS))
-            this.gl.deleteShader(this.cubeVS)
+        if (!gl.getShaderParameter(this.cubeVS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader cubeVS: ' + gl.getShaderInfoLog(this.cubeVS))
+            gl.deleteShader(this.cubeVS)
         }
 
-        this.cubeFS = this.gl.createShader(this.gl.FRAGMENT_SHADER)
-        this.gl.shaderSource(this.cubeFS, this.cubeFSsource)
-        this.gl.compileShader(this.cubeFS)
+        this.cubeFS = gl.createShader(gl.FRAGMENT_SHADER)
+        gl.shaderSource(this.cubeFS, this.cubeFSsource)
+        gl.compileShader(this.cubeFS)
 
-        if (!this.gl.getShaderParameter(this.cubeFS, this.gl.COMPILE_STATUS)) {
-            console.log('Failed to compile shader cubeFS: ' + this.gl.getShaderInfoLog(this.cubeFS))
-            this.gl.deleteShader(this.cubeFS)
+        if (!gl.getShaderParameter(this.cubeFS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader cubeFS: ' + gl.getShaderInfoLog(this.cubeFS))
+            gl.deleteShader(this.cubeFS)
         }
 
-        this.cubeShaderProgram = this.gl.createProgram()
-        this.gl.attachShader(this.cubeShaderProgram, this.cubeVS)
-        this.gl.attachShader(this.cubeShaderProgram, this.cubeFS)
-        this.gl.linkProgram(this.cubeShaderProgram)
+        this.cubeShaderProgram = gl.createProgram()
+        gl.attachShader(this.cubeShaderProgram, this.cubeVS)
+        gl.attachShader(this.cubeShaderProgram, this.cubeFS)
+        gl.linkProgram(this.cubeShaderProgram)
 
-        if (!this.gl.getProgramParameter(this.cubeShaderProgram, this.gl.LINK_STATUS)) {
-            console.log('Failed to link cubeShaderProgram: ' + this.gl.getProgramInfoLog(this.cubeShaderProgram))
-            this.gl.deleteProgram(this.cubeShaderProgram)
+        if (!gl.getProgramParameter(this.cubeShaderProgram, gl.LINK_STATUS)) {
+            console.log('Failed to link cubeShaderProgram: ' + gl.getProgramInfoLog(this.cubeShaderProgram))
+            gl.deleteProgram(this.cubeShaderProgram)
         }
 
         this.cubeShaderProgramInfo = {
             program: this.cubeShaderProgram,
-            vertexLocation: 4, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
-            worldLocation: 0, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
-            cubeidLocation: 5, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
-            faceidLocation: 6, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
-            colourLocation: 7, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_colour'),
-            normalLocation: 8, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_normal'),
-            modelLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
-            viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
-            perspectiveLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),
+            vertexLocation: 4, // gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
+            worldLocation: 0, // gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
+            cubeidLocation: 5, // gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
+            faceidLocation: 6, // gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
+            colourLocation: 7, // gl.getAttribLocation(this.cubeShaderProgram, 'a_colour'),
+            normalLocation: 8, // gl.getAttribLocation(this.cubeShaderProgram, 'a_normal'),
+            modelLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
+            viewLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
+            perspectiveLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),
         }
 
-        this.quadVS = this.gl.createShader(this.gl.VERTEX_SHADER)
-        this.gl.shaderSource(this.quadVS, this.quadVSsource)
-        this.gl.compileShader(this.quadVS)
+        this.quadVS = gl.createShader(gl.VERTEX_SHADER)
+        gl.shaderSource(this.quadVS, this.quadVSsource)
+        gl.compileShader(this.quadVS)
 
-        if (!this.gl.getShaderParameter(this.quadVS, this.gl.COMPILE_STATUS)) {
-            console.log('Failed to compile shader quadVS: ' + this.gl.getShaderInfoLog(this.quadVS))
-            this.gl.deleteShader(this.quadVS)
+        if (!gl.getShaderParameter(this.quadVS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader quadVS: ' + gl.getShaderInfoLog(this.quadVS))
+            gl.deleteShader(this.quadVS)
         }
 
-        this.quadFS = this.gl.createShader(this.gl.FRAGMENT_SHADER)
-        this.gl.shaderSource(this.quadFS, this.quadFSsource)
-        this.gl.compileShader(this.quadFS)
+        this.quadFS = gl.createShader(gl.FRAGMENT_SHADER)
+        gl.shaderSource(this.quadFS, this.quadFSsource)
+        gl.compileShader(this.quadFS)
 
-        if (!this.gl.getShaderParameter(this.quadFS, this.gl.COMPILE_STATUS)) {
-            console.log('Failed to compile shader quadFS: ' + this.gl.getShaderInfoLog(this.quadFS))
-            this.gl.deleteShader(this.quadFS)
+        if (!gl.getShaderParameter(this.quadFS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader quadFS: ' + gl.getShaderInfoLog(this.quadFS))
+            gl.deleteShader(this.quadFS)
         }
 
-        this.quadShaderProgram = this.gl.createProgram()
-        this.gl.attachShader(this.quadShaderProgram, this.quadVS)
-        this.gl.attachShader(this.quadShaderProgram, this.quadFS)
-        this.gl.linkProgram(this.quadShaderProgram)
+        this.quadShaderProgram = gl.createProgram()
+        gl.attachShader(this.quadShaderProgram, this.quadVS)
+        gl.attachShader(this.quadShaderProgram, this.quadFS)
+        gl.linkProgram(this.quadShaderProgram)
 
-        if (!this.gl.getProgramParameter(this.quadShaderProgram, this.gl.LINK_STATUS)) {
-            console.log('Failed to link quadShaderProgram: ' + this.gl.getProgramInfoLog(this.quadShaderProgram))
-            this.gl.deleteProgram(this.quadShaderProgram)
+        if (!gl.getProgramParameter(this.quadShaderProgram, gl.LINK_STATUS)) {
+            console.log('Failed to link quadShaderProgram: ' + gl.getProgramInfoLog(this.quadShaderProgram))
+            gl.deleteProgram(this.quadShaderProgram)
         }
 
         this.quadShaderProgramInfo = {
             program: this.quadShaderProgram,
-            vertexLocation: 0, // this.gl.getAttribLocation(this.quadShaderProgram, 'a_position'),
-            uvLocation: 1, // this.gl.getAttribLocation(this.quadShaderProgram, 'a_uv'),
-            samperLocation: this.gl.getUniformLocation(this.quadShaderProgram, 'u_sampler'),
+            vertexLocation: 0, // gl.getAttribLocation(this.quadShaderProgram, 'a_position'),
+            uvLocation: 1, // gl.getAttribLocation(this.quadShaderProgram, 'a_uv'),
+            samperLocation: gl.getUniformLocation(this.quadShaderProgram, 'u_sampler'),
         }
     }
 
     createFramebuffer() {
-        this.framebuffer = this.gl.createFramebuffer()
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
+        this.framebuffer = gl.createFramebuffer()
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
 
         // Create colour attachment
-        this.frameColourTexture = this.gl.createTexture()
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameColourTexture)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE)
-        this.gl.framebufferTexture2D(
-            this.gl.FRAMEBUFFER,
-            this.gl.COLOR_ATTACHMENT0,
-            this.gl.TEXTURE_2D,
+        this.frameColourTexture = gl.createTexture()
+        gl.bindTexture(gl.TEXTURE_2D, this.frameColourTexture)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT0,
+            gl.TEXTURE_2D,
             this.frameColourTexture,
             0, // No mipmapping (this isn't supported and must be 0 anyways)
         )
 
         // Create depth attachment
-        this.frameDepthBuffer = this.gl.createRenderbuffer()
-        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.frameDepthBuffer)
-        this.gl.framebufferRenderbuffer(
-            this.gl.FRAMEBUFFER,
-            this.gl.DEPTH_ATTACHMENT,
-            this.gl.RENDERBUFFER,
+        this.frameDepthBuffer = gl.createRenderbuffer()
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.frameDepthBuffer)
+        gl.framebufferRenderbuffer(
+            gl.FRAMEBUFFER,
+            gl.DEPTH_ATTACHMENT,
+            gl.RENDERBUFFER,
             this.frameDepthBuffer,
         )
 
         // Create id sampling attachment
-        this.frameIDTexture = this.gl.createTexture()
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameIDTexture)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE)
-        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE)
-        this.gl.framebufferTexture2D(
-            this.gl.FRAMEBUFFER,
-            this.gl.COLOR_ATTACHMENT1,
-            this.gl.TEXTURE_2D,
+        this.frameIDTexture = gl.createTexture()
+        gl.bindTexture(gl.TEXTURE_2D, this.frameIDTexture)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+        gl.framebufferTexture2D(
+            gl.FRAMEBUFFER,
+            gl.COLOR_ATTACHMENT1,
+            gl.TEXTURE_2D,
             this.frameIDTexture,
             0, // No mipmapping (this isn't supported and must be 0 anyways)
         )
@@ -336,37 +336,37 @@ export default class GLCanvas {
         this.canvas.width = this.width
         this.height = this.canvas.clientHeight
         this.canvas.height = this.height
-        this.gl.viewport(0, 0, this.width, this.height)
+        gl.viewport(0, 0, this.width, this.height)
         this.camera.generatePerspective(this.width, this.height)
 
         // Resize render buffers and storage
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameColourTexture)
-        this.gl.texImage2D(
-            this.gl.TEXTURE_2D,
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
+        gl.bindTexture(gl.TEXTURE_2D, this.frameColourTexture)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
             0,
-            this.gl.RGBA,
+            gl.RGBA,
             this.width,
             this.height,
             0,
-            this.gl.RGBA,
-            this.gl.UNSIGNED_BYTE,
+            gl.RGBA,
+            gl.UNSIGNED_BYTE,
             null,
         )
 
-        this.gl.bindRenderbuffer(this.gl.RENDERBUFFER, this.frameDepthBuffer)
-        this.gl.renderbufferStorage(this.gl.RENDERBUFFER, this.gl.DEPTH_COMPONENT24, this.width, this.height)
+        gl.bindRenderbuffer(gl.RENDERBUFFER, this.frameDepthBuffer)
+        gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT24, this.width, this.height)
 
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameIDTexture)
-        this.gl.texImage2D(
-            this.gl.TEXTURE_2D,
+        gl.bindTexture(gl.TEXTURE_2D, this.frameIDTexture)
+        gl.texImage2D(
+            gl.TEXTURE_2D,
             0, // LOD 0
-            this.gl.RGBA, // The texel format
+            gl.RGBA, // The texel format
             this.width,
             this.height,
             0, // Only borders of 0 width are supported
-            this.gl.RGBA, // Internal format and texel format are the same
-            this.gl.UNSIGNED_BYTE, // Internal texel format
+            gl.RGBA, // Internal format and texel format are the same
+            gl.UNSIGNED_BYTE, // Internal texel format
             null,
         )
     }
@@ -386,7 +386,6 @@ export default class GLCanvas {
         this.world = new World()
 
         this.cubeRenderPass = new CubeRenderPass(
-            this.gl,
             this.cubeShaderProgramInfo,
         )
         this.cubeRenderPass.resize(
@@ -397,7 +396,6 @@ export default class GLCanvas {
         )
 
         this.quadRenderPass = new QuadRenderPass(
-            this.gl,
             this.quadShaderProgramInfo,
             this.frameColourTexture,
         )
@@ -419,11 +417,11 @@ export default class GLCanvas {
     /// Event handling functions
     mouseClicked(x, y) {
         y = this.height - y // The texture is flipped vertically
-        this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
-        this.gl.readBuffer(this.gl.COLOR_ATTACHMENT1)
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
+        gl.readBuffer(gl.COLOR_ATTACHMENT1)
         
         let buf = new Uint8Array(4)
-        this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buf)
+        gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf)
         
         let idvec = vec3.create()
         idvec[0] = buf[0]

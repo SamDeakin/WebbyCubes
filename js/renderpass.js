@@ -87,64 +87,63 @@ const quaduvs = [
 ]
 
 class RenderPass {
-    constructor(gl, shaderProgramInfo) {
-        this.gl = gl
+    constructor(shaderProgramInfo) {
         this.shaderProgramInfo = shaderProgramInfo
     }
 
     run(now, delta, viewData, perspectiveData) {
-        this.gl.useProgram(this.shaderProgramInfo.program)
+        gl.useProgram(this.shaderProgramInfo.program)
 
         this.bindGLData()
 
         if (this.shaderProgramInfo.modelLocation) {
-            this.modelUniform = this.gl.uniformMatrix4fv(
+            this.modelUniform = gl.uniformMatrix4fv(
                 this.shaderProgramInfo.modelLocation, // The uniform location
                 false, // Whether to transpose the mat4, but true is unsupported lol
                 this.modelData, // Initial uniform data
             )
         }
         if (this.shaderProgramInfo.viewLocation) {
-            this.viewUniform = this.gl.uniformMatrix4fv(
+            this.viewUniform = gl.uniformMatrix4fv(
                 this.shaderProgramInfo.viewLocation,
                 false,
                 viewData,
             )
         }
         if (this.shaderProgramInfo.perspectiveLocation) {
-            this.perspectiveUniform = this.gl.uniformMatrix4fv(
+            this.perspectiveUniform = gl.uniformMatrix4fv(
                 this.shaderProgramInfo.perspectiveLocation,
                 false,
                 perspectiveData,
             )
         }
 
-        this.gl.drawElementsInstanced(
-            this.gl.TRIANGLES, // Draw normal triangles
+        gl.drawElementsInstanced(
+            gl.TRIANGLES, // Draw normal triangles
             this.numVertices, // Number of vertices per instance
-            this.gl.UNSIGNED_SHORT, // Data format of the index buffer
+            gl.UNSIGNED_SHORT, // Data format of the index buffer
             0, // Start at the beginning of the buffer
             this.instanceCount, // Number of cubes to draw
         )
 
         this.unbindGLData()
 
-        this.gl.useProgram(null)
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, null)
+        gl.useProgram(null)
+        gl.bindBuffer(gl.ARRAY_BUFFER, null)
+        gl.bindBuffer(gl.ARRAY_BUFFER, null)
     }
 }
 
 export class CubeRenderPass extends RenderPass {
-    constructor(gl, shaderProgramInfo) {
-        super(gl, shaderProgramInfo)
+    constructor(shaderProgramInfo) {
+        super(shaderProgramInfo)
 
         this.numVertices = 36
         this.instanceCount = 1
 
-        this.vertexBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(cubeData), this.gl.STATIC_DRAW)
+        this.vertexBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeData), gl.STATIC_DRAW)
 
         // Half size and translate to be in range 0-1
         this.modelData = mat4.create()
@@ -159,16 +158,16 @@ export class CubeRenderPass extends RenderPass {
             0.5,
         )
 
-        this.indexBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), this.gl.STATIC_DRAW)
+        this.indexBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW)
 
-        this.worldTransformBuffer = this.gl.createBuffer()
-        this.colourBuffer = this.gl.createBuffer()
-        this.cubeidBuffer = this.gl.createBuffer()
+        this.worldTransformBuffer = gl.createBuffer()
+        this.colourBuffer = gl.createBuffer()
+        this.cubeidBuffer = gl.createBuffer()
 
-        this.normalBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
+        this.normalBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer)
         let normals = new Float32Array(cubeNormals.length * 4)
         for (let i = 0; i < cubeNormals.length; i++) {
             normals[i * 4 + 0] = cubeNormals[i] / 255
@@ -176,10 +175,10 @@ export class CubeRenderPass extends RenderPass {
             normals[i * 4 + 2] = cubeNormals[i] / 255
             normals[i * 4 + 3] = cubeNormals[i] / 255
         }
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, normals, this.gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW)
 
-        this.faceidBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.faceidBuffer)
+        this.faceidBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.faceidBuffer)
         let faceids = new Float32Array(cubeSideIds.length * 4)
         for (let i = 0; i < cubeSideIds.length; i++) {
             faceids[i * 4 + 0] = cubeSideIds[i] / 255
@@ -187,7 +186,7 @@ export class CubeRenderPass extends RenderPass {
             faceids[i * 4 + 2] = cubeSideIds[i] / 255
             faceids[i * 4 + 3] = cubeSideIds[i] / 255
         }
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, faceids, this.gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER, faceids, gl.STATIC_DRAW)
     }
 
     resize(size, positions, colours, ids) {
@@ -203,8 +202,8 @@ export class CubeRenderPass extends RenderPass {
                 this.worldData[i * 16 + j] = transform[j]
             }
         }
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.worldData, this.gl.DYNAMIC_DRAW, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, this.worldData, gl.DYNAMIC_DRAW, 0)
 
         // Reset colours
         this.colourData = new Float32Array(size * 3)
@@ -213,8 +212,8 @@ export class CubeRenderPass extends RenderPass {
             this.colourData[i * 3 + 1] = colours[i][1]
             this.colourData[i * 3 + 2] = colours[i][2]
         }
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.colourData, this.gl.DYNAMIC_DRAW, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.colourBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, this.colourData, gl.DYNAMIC_DRAW, 0)
 
         // Reset cube IDs
         // IDs are pre-transformed to a vec3 of uints for us
@@ -224,159 +223,159 @@ export class CubeRenderPass extends RenderPass {
             this.idData[i * 3 + 1] = ids[i][1] / 255.0
             this.idData[i * 3 + 2] = ids[i][2] / 255.0
         }
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, this.idData, this.gl.DYNAMIC_DRAW, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.cubeidBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, this.idData, gl.DYNAMIC_DRAW, 0)
     }
 
     bindGLData() {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.vertexLocation,
             3, // 3 floats per vertex
-            this.gl.FLOAT, // Vertices are defined with floats
+            gl.FLOAT, // Vertices are defined with floats
             false, // Don't normalize
             0, // No padding between vertices
             0, // Start at the beginning of the buffer
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.worldTransformBuffer)
-        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 0, 4, this.gl.FLOAT, false, 16, 0)
-        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 1, 4, this.gl.FLOAT, false, 16, 16)
-        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 2, 4, this.gl.FLOAT, false, 16, 32)
-        this.gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 3, 4, this.gl.FLOAT, false, 16, 48)
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 0, 1)
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 1, 1)
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 2, 1)
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 3, 1)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 0, 4, gl.FLOAT, false, 16, 0)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 1, 4, gl.FLOAT, false, 16, 16)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 2, 4, gl.FLOAT, false, 16, 32)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldLocation + 3, 4, gl.FLOAT, false, 16, 48)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 0, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 1, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 2, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldLocation + 3, 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
 
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.colourBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.colourLocation,
             3,
-            this.gl.FLOAT,
+            gl.FLOAT,
             false,
             0,
             0,
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.colourLocation, 1)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.colourLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.colourLocation, 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.colourLocation)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.normalLocation,
             3,
-            this.gl.FLOAT,
+            gl.FLOAT,
             false,
             0,
             0,
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.normalLocation, 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.normalLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.normalLocation, 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.normalLocation)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.cubeidBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.cubeidLocation,
             3,
-            this.gl.FLOAT,
+            gl.FLOAT,
             false,
             0,
             0,
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.cubeidLocation, 1)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.cubeidLocation, 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.faceidBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.faceidBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.faceidLocation,
             1,
-            this.gl.FLOAT,
+            gl.FLOAT,
             false,
             0,
             0,
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.faceidLocation, 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.faceidLocation, 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
     }
 
     unbindGLData() {
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.colourLocation)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.normalLocation)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 0)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.colourLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.normalLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
     }
 }
 
 export class QuadRenderPass extends RenderPass {
-    constructor(gl, shaderProgramInfo, quadTexture) {
-        super(gl, shaderProgramInfo)
+    constructor(shaderProgramInfo, quadTexture) {
+        super(shaderProgramInfo)
 
         this.quadTexture = quadTexture
         this.numVertices = 6
         this.instanceCount = 1
 
-        this.vertexBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(quadData), this.gl.STATIC_DRAW)
+        this.vertexBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quadData), gl.STATIC_DRAW)
 
-        this.uvBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer)
-        this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(quaduvs), this.gl.STATIC_DRAW)
+        this.uvBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quaduvs), gl.STATIC_DRAW)
 
-        this.indexBuffer = this.gl.createBuffer()
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
-        this.gl.bufferData(this.gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(quadIndices), this.gl.STATIC_DRAW)
+        this.indexBuffer = gl.createBuffer()
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(quadIndices), gl.STATIC_DRAW)
     }
 
     bindGLData() {
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.vertexBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.vertexLocation,
             3, // 3 floats per vertex
-            this.gl.FLOAT, // Vertices are defined with floats
+            gl.FLOAT, // Vertices are defined with floats
             false, // Don't normalize
             0, // No padding between vertices
             0, // Start at the beginning of the buffer
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
-        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.uvBuffer)
-        this.gl.vertexAttribPointer(
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer)
+        gl.vertexAttribPointer(
             this.shaderProgramInfo.uvLocation,
             2,
-            this.gl.FLOAT,
+            gl.FLOAT,
             false,
             0,
             0,
         )
-        this.gl.vertexAttribDivisor(this.shaderProgramInfo.uvLocation, 0)
-        this.gl.enableVertexAttribArray(this.shaderProgramInfo.uvLocation)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.uvLocation, 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.uvLocation)
 
-        this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
 
-        this.gl.activeTexture(this.gl.TEXTURE0)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.quadTexture)
-        this.gl.activeTexture(this.gl.TEXTURE0)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, this.quadTexture)
-        this.gl.uniform1i(this.shaderProgramInfo.samplerLocation, 0)
+        gl.activeTexture(gl.TEXTURE0)
+        gl.bindTexture(gl.TEXTURE_2D, this.quadTexture)
+        gl.activeTexture(gl.TEXTURE0)
+        gl.bindTexture(gl.TEXTURE_2D, this.quadTexture)
+        gl.uniform1i(this.shaderProgramInfo.samplerLocation, 0)
     }
 
     unbindGLData() {
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
-        this.gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, null)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
+        gl.bindTexture(gl.TEXTURE_2D, null)
     }
 }
