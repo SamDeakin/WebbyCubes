@@ -58,6 +58,15 @@ const cubeSideIds = [
     6, // left
 ]
 
+const cubeNormals = [
+    0.0, 0.0, 1.0, // Front face
+    0.0, 0.0, -1.0, // Back face
+    0.0, 1.0, 0.0, // Top face
+    0.0, -1.0, 0.0, // Bottom face
+    1.0, 0.0, 0.0, // Right face
+    -1.0, 0.0, 0.0, // Left face
+]
+
 const quadData = [
     -1, -1, 0,
     -1, 1, 0,
@@ -158,6 +167,17 @@ export class CubeRenderPass extends RenderPass {
         this.colourBuffer = this.gl.createBuffer()
         this.cubeidBuffer = this.gl.createBuffer()
 
+        this.normalBuffer = this.gl.createBuffer()
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
+        let normals = new Float32Array(cubeNormals.length * 4)
+        for (let i = 0; i < cubeNormals.length; i++) {
+            normals[i * 4 + 0] = cubeNormals[i] / 255
+            normals[i * 4 + 1] = cubeNormals[i] / 255
+            normals[i * 4 + 2] = cubeNormals[i] / 255
+            normals[i * 4 + 3] = cubeNormals[i] / 255
+        }
+        this.gl.bufferData(this.gl.ARRAY_BUFFER, normals, this.gl.STATIC_DRAW)
+
         this.faceidBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.faceidBuffer)
         let faceids = new Float32Array(cubeSideIds.length * 4)
@@ -237,6 +257,30 @@ export class CubeRenderPass extends RenderPass {
 
         this.gl.bindBuffer(this.gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
 
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.colourBuffer)
+        this.gl.vertexAttribPointer(
+            this.shaderProgramInfo.colourLocation,
+            3,
+            this.gl.FLOAT,
+            false,
+            0,
+            0,
+        )
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.colourLocation, 1)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.colourLocation)
+
+        this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.normalBuffer)
+        this.gl.vertexAttribPointer(
+            this.shaderProgramInfo.normalLocation,
+            3,
+            this.gl.FLOAT,
+            false,
+            0,
+            0,
+        )
+        this.gl.vertexAttribDivisor(this.shaderProgramInfo.normalLocation, 0)
+        this.gl.enableVertexAttribArray(this.shaderProgramInfo.normalLocation)
+
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
         this.gl.vertexAttribPointer(
             this.shaderProgramInfo.cubeidLocation,
@@ -268,6 +312,8 @@ export class CubeRenderPass extends RenderPass {
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.colourLocation)
+        this.gl.disableVertexAttribArray(this.shaderProgramInfo.normalLocation)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
     }

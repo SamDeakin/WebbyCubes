@@ -243,6 +243,8 @@ export default class GLCanvas {
             worldLocation: 0, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
             cubeidLocation: 5, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
             faceidLocation: 6, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
+            colourLocation: 7, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_colour'),
+            normalLocation: 8, // this.gl.getAttribLocation(this.cubeShaderProgram, 'a_normal'),
             modelLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
             viewLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
             perspectiveLocation: this.gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),

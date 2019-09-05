@@ -3,6 +3,7 @@
 precision highp float;
 
 in vec4 vertexcolour;
+in vec4 vertexnormal;
 in vec3 cubeid;
 in float faceid;
 
