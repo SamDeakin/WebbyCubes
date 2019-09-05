@@ -2,7 +2,7 @@ import { Cube, World } from "./cubes.js"
 import { CubeRenderPass, QuadRenderPass } from "./renderpass.js"
 import { Camera } from "./camera.js"
 
-const MouseMoveThreshold = 5 // 5px min to count as move instead of click
+const MouseMoveThreshold = 15 // Min to count as move instead of click
 const MouseComboMoveThreshold = 0.7 // If >x% of movement is in x or y axis then lock to just that type of dragging
 
 export default class GLCanvas {
@@ -163,6 +163,11 @@ export default class GLCanvas {
         this.gl.depthFunc(this.gl.LEQUAL) // Near things obscure far things
         this.gl.viewport(0, 0, this.width, this.height)
 
+        this.gl.drawBuffers([
+            this.gl.COLOR_ATTACHMENT0,
+            this.gl.COLOR_ATTACHMENT1,
+        ])
+
         // Clear the canvas before we start drawing on it.
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
@@ -172,6 +177,11 @@ export default class GLCanvas {
 
         this.gl.disable(this.gl.DEPTH_TEST);
         this.gl.viewport(0, 0, this.width, this.height)
+
+        this.gl.drawBuffers([
+            this.gl.BACK,
+        ])
+
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
@@ -308,6 +318,8 @@ export default class GLCanvas {
         this.gl.bindTexture(this.gl.TEXTURE_2D, this.frameIDTexture)
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST)
         this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE)
+        this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE)
         this.gl.framebufferTexture2D(
             this.gl.FRAMEBUFFER,
             this.gl.COLOR_ATTACHMENT1,
@@ -398,7 +410,7 @@ export default class GLCanvas {
     mouseClicked(x, y) {
         y = this.height - y // The texture is flipped vertically
         this.gl.bindFramebuffer(this.gl.FRAMEBUFFER, this.framebuffer)
-        this.gl.readBuffer(this.gl.COLOR_ATTACHMENT0)
+        this.gl.readBuffer(this.gl.COLOR_ATTACHMENT1)
         let buf = new Uint8Array(4)
         this.gl.readPixels(x, y, 1, 1, this.gl.RGBA, this.gl.UNSIGNED_BYTE, buf)
         console.log("Mouse!", x, y, buf)

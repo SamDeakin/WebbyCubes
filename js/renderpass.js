@@ -49,13 +49,13 @@ const cubeIndices = [
 // ID values to be rendered to colour attachment 1 alpha channel and tested when a user clicks.
 // These let us tell which face of the cube was touched.
 const cubeSideIds = [
-    // Skip past 1, 1 is the default alpha value.
-    2, // front
-    3, // back
-    4, // top
-    5, // bottom
-    6, // right
-    7, // left
+    // Skip 0, as that can easily be misinterpreted.
+    1, // front
+    2, // back
+    3, // top
+    4, // bottom
+    5, // right
+    6, // left
 ]
 
 const quadData = [
@@ -162,19 +162,17 @@ export class CubeRenderPass extends RenderPass {
         this.cubeidBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.cubeidBuffer)
         // Test cube id data
-        let buf = new Float32Array([6/255, 9/255, 69/255])
+        let buf = new Float32Array([6/255, 120/255, 255/255])
         this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(buf), this.gl.DYNAMIC_DRAW)
 
         this.faceidBuffer = this.gl.createBuffer()
         this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.faceidBuffer)
-        let faceids = new Float32Array(cubeSideIds.length * 6)
+        let faceids = new Float32Array(cubeSideIds.length * 4)
         for (let i = 0; i < cubeSideIds.length; i++) {
-            faceids[i * 6 + 0] = cubeSideIds[i] / 255
-            faceids[i * 6 + 1] = cubeSideIds[i] / 255
-            faceids[i * 6 + 2] = cubeSideIds[i] / 255
-            faceids[i * 6 + 3] = cubeSideIds[i] / 255
-            faceids[i * 6 + 4] = cubeSideIds[i] / 255
-            faceids[i * 6 + 5] = cubeSideIds[i] / 255
+            faceids[i * 4 + 0] = cubeSideIds[i] / 255
+            faceids[i * 4 + 1] = cubeSideIds[i] / 255
+            faceids[i * 4 + 2] = cubeSideIds[i] / 255
+            faceids[i * 4 + 3] = cubeSideIds[i] / 255
         }
         this.gl.bufferData(this.gl.ARRAY_BUFFER, faceids, this.gl.STATIC_DRAW)
     }
@@ -302,6 +300,6 @@ export class QuadRenderPass extends RenderPass {
     unbindGLData() {
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
         this.gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
-        // this.gl.bindTexture(this.gl.TEXTURE_2D, null)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, null)
     }
 }
