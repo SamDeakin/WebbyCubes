@@ -1,0 +1,55 @@
+/*
+ * Styles for the control bar.
+ */
+
+html, body {
+    font-family: sans-serif;
+} 
+
+#controlbar {
+    top: 0;
+    position: fixed;
+    width: 100%;
+    background-color: rgba(20, 20, 20, 0.3);
+    color: #D7D7D7;
+}
+
+#controlbar .control {
+    display: inline-block;
+    margin: 3px;
+    vertical-align: top;
+}
+
+#controlbar .control .preview {
+    height: 50px;
+    width: 50px;
+    margin: 3px;
+}
+
+#controlbar #custom.control #custominput {
+    border: 0px;
+    padding: 0px;
+    display: block;
+    box-sizing: content-box;
+}
+
+#controlbar #delete.control .preview {
+    background-color: #FFF;
+    background-size: 10px 10px;
+    background-position: 0 0, 5px 5px;
+    background-image:
+        linear-gradient(
+            45deg,
+            black 25%,
+            transparent 25%,
+            transparent 75%,
+            black 75%,
+            black),
+        linear-gradient(
+            45deg,
+            black 25%,
+            transparent 25%,
+            transparent 75%,
+            black 75%,
+            black);
+}
