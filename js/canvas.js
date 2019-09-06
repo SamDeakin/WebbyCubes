@@ -1,6 +1,7 @@
 import { World } from "./cubes.js"
 import { CubeRenderPass, QuadRenderPass } from "./renderpass.js"
 import { Camera } from "./camera.js"
+import { ControlBar } from "./controlbar.js"
 
 const MouseMoveThreshold = 15 // Min to count as move instead of click
 const MouseComboMoveThreshold = 0.7 // If >x% of movement is in x or y axis then lock to just that type of dragging
@@ -121,6 +122,12 @@ export default class GLCanvas {
             _this.canvas.dispatchEvent(mouseEvent)
         }, false)
 
+        // Prevent right click on canvas
+        this.canvas.addEventListener("contextmenu", function (e) {
+            e.preventDefault()
+            return false
+        })
+
         // Prevent scrolling when touching the canvas
         document.body.addEventListener("touchstart", function (e) {
             if (e.target == _this.canvas) {
@@ -146,6 +153,8 @@ export default class GLCanvas {
         }
 
         this.loadData()
+
+        this.controlbar = new ControlBar()
     }
 
     render(now, delta) {

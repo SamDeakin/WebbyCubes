@@ -10,14 +10,20 @@ html, body {
     top: 0;
     position: fixed;
     width: 100%;
-    background-color: rgba(20, 20, 20, 0.3);
-    color: #D7D7D7;
+    background-color: rgba(0, 0, 0, 0.4);
+    color: #F0F0F0;
 }
 
 #controlbar .control {
-    display: inline-block;
+    display: inline-flex;
     margin: 3px;
+    padding: 3px;
     vertical-align: top;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
 }
 
 #controlbar .control .preview {
@@ -52,4 +58,9 @@ html, body {
             transparent 75%,
             black 75%,
             black);
+}
+
+/* For the currently selected control */
+#controlbar .control.selected {
+    background-color: rgba(0, 0, 0, 0.8);
 }
