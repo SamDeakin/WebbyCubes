@@ -147,15 +147,15 @@ export class CubeRenderPass extends RenderPass {
 
         // Half size and translate to be in range 0-1
         this.modelData = mat4.create()
-        mat4.translate(
-            this.modelData,
-            this.modelData,
-            [1, 1, 1],
-        )
         mat4.scale(
             this.modelData,
             this.modelData,
             [0.5, 0.5, 0.5],
+        )
+        mat4.translate(
+            this.modelData,
+            this.modelData,
+            [1, 1, 1],
         )
 
         this.indexBuffer = gl.createBuffer()
@@ -202,7 +202,6 @@ export class CubeRenderPass extends RenderPass {
                 this.worldData[i * 16 + j] = transform[j]
             }
         }
-        console.log(positions, this.worldData)
         gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, this.worldData, gl.DYNAMIC_DRAW, 0)
 

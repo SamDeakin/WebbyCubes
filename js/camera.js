@@ -5,6 +5,7 @@ export class Camera {
         this.distance = 0.0
         this.ascension = 0.0
         this.rotation = 0.0
+        this.pan = 0.0
 
         this.generatePerspective(width, height)
     }
@@ -41,7 +42,14 @@ export class Camera {
         mat4.rotate(
             out,
             out,
-            this.rotation,
+            this.pan * Math.PI / 180,
+            [1.0, 0.0, 0.0],
+        )
+
+        mat4.rotate(
+            out,
+            out,
+            this.rotation * Math.PI / 180,
             [0.0, 0.1, 0.0],
         )
 
@@ -52,12 +60,21 @@ export class Camera {
         return this.perspectiveMatrix
     }
 
-    dragVertical(dy) {
-        this.distance += dy * 0.005
-        this.ascension += dy * 0.002
+    dragVerticalPrimary(dy) {
+        this.pan += dy * 0.03
+        this.pan = Math.min(this.pan, 179.9)
+        this.pan = Math.max(this.pan, -179.9)
     }
 
-    dragHorizontal(dx) {
-        this.rotation += dx * 0.003
+    dragHorizontalPrimary(dx) {
+        this.rotation += (dx * 0.1) % 360.0
+    }
+
+    dragVerticalSecondary(dy) {
+        this.distance += dy * 0.005
+    }
+
+    dragHorizontalSecondary(dx) {
+        this.ascension += dx * 0.002
     }
 }
