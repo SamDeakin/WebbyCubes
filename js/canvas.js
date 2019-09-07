@@ -453,7 +453,11 @@ export default class GLCanvas {
         idvec[2] = buf[2]
         let faceid = buf[3]
 
-        this.world.userTouched(idvec, faceid)
+        if (this.controlbar.isDeleting) {
+            this.world.userDeleted(idvec)
+        } else {
+            this.world.userAdded(idvec, faceid, this.controlbar.currentColour)
+        }
 
         // Update render pass
         this.cubeRenderPass.resize(

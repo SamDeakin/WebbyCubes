@@ -26,7 +26,7 @@ class World {
         ]
     }
 
-    userTouched(idvec, face) {
+    userAdded(idvec, face, colour) {
         let id = DecodeIDs(idvec)
         
         if (face == 255)
@@ -63,8 +63,15 @@ class World {
 
         this.cubes.push(new Cube(
             vec3.fromValues(newPos[0], newPos[1], newPos[2]),
-            vec3.fromValues(1.0, 0.0, 1.0),
+            vec3.fromValues(colour[0], colour[1], colour[2]),
         ))
+    }
+
+    userDeleted(idvec) {
+        let id = DecodeIDs(idvec)
+
+        // TODO
+        console.log("delete", id)
     }
 
     get size() {

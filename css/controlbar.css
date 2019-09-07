@@ -32,7 +32,7 @@ html, body {
     margin: 3px;
 }
 
-#controlbar #custom.control #custominput {
+#controlbar #custom.control .custominput {
     border: 0px;
     padding: 0px;
     display: block;
