@@ -4,7 +4,7 @@ precision highp float;
 
 in vec3 vertex_colour;
 in vec3 object_normal;
-in vec4 object_eye;
+in vec3 object_eye;
 in vec3 cubeid;
 in float faceid;
 
@@ -15,12 +15,14 @@ vec3 sun = normalize(vec3(0.5, 0.5, 0.5));
 
 void main() {
     sun = normalize(sun);
-    vec3 eye_direction = normalize(object_eye.xyz);
 
-    float eye_to_normal = dot(eye_direction, object_normal);
+    float eye_dot_normal = dot(object_eye.xyz, object_normal);
 
-    vec3 ambient = vertex_colour * eye_to_normal;
+    // Set the ambient colour to be brighter for more perpendicular surfaces
+    // (With a min of half brightness for a parallel surface)
+    vec3 ambient = vertex_colour * (eye_dot_normal * 0.5 + 0.5);
 
-    fragcolour = vec4(vertex_colour * 0.3 + ambient * 0.7, 1.0);
+    fragcolour = vec4(ambient, 1.0);
+    fragcolour = vec4(object_eye.xyz, 1.0);
     id = vec4(cubeid, faceid);
 }

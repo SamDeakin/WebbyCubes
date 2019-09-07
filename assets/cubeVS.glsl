@@ -13,7 +13,7 @@ uniform mat4 u_model;
 
 out vec3 vertex_colour;
 out vec3 object_normal;
-out vec4 object_eye;
+out vec3 object_eye;
 out vec3 cubeid;
 out float faceid;
 
@@ -28,7 +28,8 @@ void main() {
     // a faster implementation than I would for this project.
     // Potential optimization if we end up doing this for many types of objects and render passes.
     vec4 view_eye = vec4(view_pos.xyz * -1.0, view_pos.w);
-    object_eye = inverse(modelview) * view_eye;
+    vec4 object_eye_pos = inverse(modelview) * view_eye;
+    object_eye = normalize(object_eye_pos.xyz / object_eye_pos.w);
 
     cubeid = a_cube;
     faceid = a_face;
