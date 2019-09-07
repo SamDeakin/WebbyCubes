@@ -19,6 +19,23 @@ export class ControlBar {
             $(".control").removeClass("selected")
             $(this).addClass("selected")
         })
+
+        // Set up labelling for colours
+        $("#controlbar .control").each(function (index, control) {
+            if ($(control).is("#delete"))
+                return
+
+            let input = $(control).children(".custominput")
+            let value = input.val()
+
+            let label = $(control).children(".label")
+            label.text(value)
+
+            // Set up labelling in the future
+            input.change(function (e) {
+                label.text(input.val())
+            })
+        })
     }
 
     get isDeleting() {
