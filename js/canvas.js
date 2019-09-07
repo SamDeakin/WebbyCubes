@@ -31,6 +31,7 @@ export default class GLCanvas {
             click: false,
             draggingX: false,
             draggingY: false,
+            button: 0,
         }
         this.canvas.addEventListener('mousedown', (e) => {
             // Set up tracking so we can filter mouseup and mousemove into drag and click
@@ -44,6 +45,7 @@ export default class GLCanvas {
             mouse.netdy = 0
             mouse.draggingX = false
             mouse.draggingY = false
+            mouse.button = e.buttons
         }, false)
         this.canvas.addEventListener('mouseup', (e) => {
             mouse.held = false
@@ -91,10 +93,14 @@ export default class GLCanvas {
 
             mouse.click = false
 
-            if (mouse.draggingX)
-                _this.mouseDraggedX(mouse.x, mouse.dx)
-            if (mouse.draggingY)
-                _this.mouseDraggedY(mouse.y, mouse.dy)
+            if (mouse.draggingX && mouse.button == 1)
+                _this.mouseDraggedXPrimary(mouse.x, mouse.dx)
+            if (mouse.draggingY && mouse.button == 1)
+                _this.mouseDraggedYPrimary(mouse.y, mouse.dy)
+            if (mouse.draggingX && mouse.button == 2)
+                _this.mouseDraggedXSecondary(mouse.x, mouse.dx)
+            if (mouse.draggingY && mouse.button == 2)
+                _this.mouseDraggedYSecondary(mouse.y, mouse.dy)
 
             mouse.dx = 0
             mouse.dy = 0
@@ -106,12 +112,15 @@ export default class GLCanvas {
             var mouseEvent = new MouseEvent("mousedown", {
                 clientX: touch.clientX,
                 clientY: touch.clientY,
+                buttons: e.touches.length,
             })
             _this.canvas.dispatchEvent(mouseEvent)
+            e.preventDefault()
         }, false)
         this.canvas.addEventListener("touchend", function (e) {
             var mouseEvent = new MouseEvent("mouseup", {})
             _this.canvas.dispatchEvent(mouseEvent)
+            e.preventDefault()
         }, false)
         this.canvas.addEventListener("touchmove", function (e) {
             var touch = e.touches[0]
@@ -120,6 +129,7 @@ export default class GLCanvas {
                 clientY: touch.clientY,
             })
             _this.canvas.dispatchEvent(mouseEvent)
+            e.preventDefault()
         }, false)
 
         // Prevent right click on canvas
@@ -143,6 +153,11 @@ export default class GLCanvas {
             if (e.target == _this.canvas) {
                 e.preventDefault()
             }
+        }, false)
+
+        // Disable the contextmenu on the canvas. It interferes with right click drag.
+        this.canvas.addEventListener("contextmenu", function (e) {
+            e.preventDefault()
         }, false)
 
         window.gl = this.canvas.getContext("webgl2")
@@ -439,13 +454,29 @@ export default class GLCanvas {
         let faceid = buf[3]
 
         this.world.userTouched(idvec, faceid)
+
+        // Update render pass
+        this.cubeRenderPass.resize(
+            this.world.size,
+            this.world.positions,
+            this.world.colours,
+            this.world.ids,
+        )
     }
 
-    mouseDraggedX(x, dx) {
-        this.camera.dragHorizontal(dx)
+    mouseDraggedXPrimary(x, dx) {
+        this.camera.dragHorizontalPrimary(dx)
     }
 
-    mouseDraggedY(y, dy) {
-        this.camera.dragVertical(dy)
+    mouseDraggedYPrimary(y, dy) {
+        this.camera.dragVerticalPrimary(dy)
+    }
+
+    mouseDraggedXSecondary(x, dx) {
+        this.camera.dragHorizontalSecondary(dx)
+    }
+
+    mouseDraggedYSecondary(y, dy) {
+        this.camera.dragVerticalSecondary(dy)
     }
 }
