@@ -7,20 +7,29 @@ layout(location = 6) in float a_face;
 layout(location = 7) in vec3 a_colour;
 layout(location = 8) in vec3 a_normal;
 
-
 uniform mat4 u_perspective;
 uniform mat4 u_view;
 uniform mat4 u_model;
 
-out vec4 vertexcolour;
-out vec4 vertexnormal;
+out vec3 vertex_colour;
+out vec3 object_normal;
+out vec4 object_eye;
 out vec3 cubeid;
 out float faceid;
 
 void main() {
-    gl_Position = u_perspective * u_view * a_world * u_model * vec4(a_position, 1.0);
-    vertexcolour = vec4(a_colour, 1.0);
-    vertexnormal = vec4(a_normal, 1.0);
+    mat4 modelview = u_view * a_world * u_model;
+    vec4 view_pos = modelview * vec4(a_position, 1.0);
+    gl_Position = u_perspective * view_pos;
+    vertex_colour = a_colour;
+    object_normal = a_normal;
+
+    // We should really do this inverse on cpu, but chances are nvidia/amd/intel can write
+    // a faster implementation than I would for this project.
+    // Potential optimization if we end up doing this for many types of objects and render passes.
+    vec4 view_eye = vec4(view_pos.xyz * -1.0, view_pos.w);
+    object_eye = inverse(modelview) * view_eye;
+
     cubeid = a_cube;
     faceid = a_face;
 }

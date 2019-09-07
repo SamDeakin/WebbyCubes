@@ -13,7 +13,8 @@ export default class GLCanvas {
         this.height = 0
 
         this.camera = new Camera(
-            [0, 7, 15],
+            // [0, 7, 15],
+            [0, 1, 5],
             [0, 1, 0],
             this.width,
             this.height,
@@ -184,6 +185,7 @@ export default class GLCanvas {
         gl.clearDepth(1.0) // Clear everything
         gl.enable(gl.DEPTH_TEST) // Enable depth testing
         gl.depthFunc(gl.LEQUAL) // Near things obscure far things
+        gl.cullFace(gl.BACK)
         gl.viewport(0, 0, this.width, this.height)
 
         gl.drawBuffers([

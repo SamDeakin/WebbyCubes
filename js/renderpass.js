@@ -164,11 +164,19 @@ export class CubeRenderPass extends RenderPass {
         this.normalBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, this.normalBuffer)
         let normals = new Float32Array(cubeNormals.length * 4)
-        for (let i = 0; i < cubeNormals.length; i++) {
-            normals[i * 4 + 0] = cubeNormals[i] / 255
-            normals[i * 4 + 1] = cubeNormals[i] / 255
-            normals[i * 4 + 2] = cubeNormals[i] / 255
-            normals[i * 4 + 3] = cubeNormals[i] / 255
+        for (let face = 0; face < 6; face++) { // 6 faces per cube
+            for (let vertex = 0; vertex < 4; vertex++) { // 4 vertices per face
+                for (let index = 0; index < 3; index++) { // 3 numbers per vec3
+                    normals[
+                        face * 4 * 3
+                        + vertex * 3
+                        + index
+                    ] = cubeNormals[
+                        face * 3
+                        + index
+                    ]
+                }
+            }
         }
         gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW)
 
