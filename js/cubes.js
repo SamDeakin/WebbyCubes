@@ -70,8 +70,7 @@ class World {
     userDeleted(idvec) {
         let id = DecodeIDs(idvec)
 
-        // TODO
-        console.log("delete", id)
+        this.cubes.splice(id, 1)
     }
 
     get size() {

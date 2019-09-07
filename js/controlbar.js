@@ -5,9 +5,9 @@ function textToColour(text) {
     // Something other than a 7-char hex number (eg. #F0F0F0). Assume
     // it does lol
     let colour = vec3.create()
-    colour[0] = parseInt(text.substring(1, 3), 16)
-    colour[1] = parseInt(text.substring(3, 5), 16)
-    colour[2] = parseInt(text.substring(5, 7), 16)
+    colour[0] = parseInt(text.substring(1, 3), 16) / 255
+    colour[1] = parseInt(text.substring(3, 5), 16) / 255
+    colour[2] = parseInt(text.substring(5, 7), 16) / 255
     return colour
 }
 

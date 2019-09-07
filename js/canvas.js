@@ -46,15 +46,18 @@ export default class GLCanvas {
             mouse.draggingX = false
             mouse.draggingY = false
             mouse.button = e.buttons
+            e.preventDefault()
         }, false)
         this.canvas.addEventListener('mouseup', (e) => {
             mouse.held = false
             if (mouse.click) {
                 _this.mouseClicked(mouse.x, mouse.y)
             }
+            e.preventDefault()
         }, false)
         this.canvas.addEventListener('mouseleave', (e) => {
             mouse.held = false
+            e.preventDefault()
         })
         this.canvas.addEventListener('mousemove', (e) => {
             if (!mouse.held) {
@@ -104,6 +107,7 @@ export default class GLCanvas {
 
             mouse.dx = 0
             mouse.dy = 0
+            e.preventDefault()
         }, false)
 
         // Set up touch events for mobile
@@ -153,11 +157,6 @@ export default class GLCanvas {
             if (e.target == _this.canvas) {
                 e.preventDefault()
             }
-        }, false)
-
-        // Disable the contextmenu on the canvas. It interferes with right click drag.
-        this.canvas.addEventListener("contextmenu", function (e) {
-            e.preventDefault()
         }, false)
 
         window.gl = this.canvas.getContext("webgl2")
