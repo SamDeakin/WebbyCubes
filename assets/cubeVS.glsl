@@ -27,9 +27,9 @@ void main() {
     vertex_colour = a_colour;
     object_normal = a_normal;
 
-    vec4 view_eye = vec4(view_pos.xyz * -1.0, view_pos.w);
-    vec4 object_eye_pos = u_model_inverse * a_world_inverse * u_view_inverse * view_eye;
-    object_eye = normalize(object_eye_pos.xyz / object_eye_pos.w);
+    vec4 view_eye = vec4(view_pos.xyz * -1.0 / view_pos.w, 0.0);
+    vec4 object_eye_pos = a_world_inverse * u_view_inverse * view_eye;
+    object_eye = normalize(object_eye_pos.xyz);
 
     cubeid = a_cube;
     faceid = a_face;

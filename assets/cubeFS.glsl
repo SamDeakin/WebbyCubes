@@ -23,6 +23,5 @@ void main() {
     vec3 ambient = vertex_colour * (eye_dot_normal * 0.5 + 0.5);
 
     fragcolour = vec4(ambient, 1.0);
-    fragcolour = vec4(object_eye.xyz, 1.0);
     id = vec4(cubeid, faceid);
 }
