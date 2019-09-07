@@ -13,7 +13,7 @@ export default class GLCanvas {
         this.height = 0
 
         this.camera = new Camera(
-            [0, 1, 5],
+            [0, 7, 15],
             [0, 1, 0],
             this.width,
             this.height,

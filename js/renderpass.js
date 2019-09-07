@@ -145,17 +145,12 @@ export class CubeRenderPass extends RenderPass {
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(cubeData), gl.STATIC_DRAW)
 
-        // Half size and translate to be in range 0-1
+        // Half size. We leave in the range of (-0.5, 0.5) to force a "centre" cube
         this.modelData = mat4.create()
         mat4.scale(
             this.modelData,
             this.modelData,
             [0.5, 0.5, 0.5],
-        )
-        mat4.translate(
-            this.modelData,
-            this.modelData,
-            [1, 1, 1],
         )
 
         this.indexBuffer = gl.createBuffer()

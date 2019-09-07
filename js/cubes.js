@@ -22,7 +22,33 @@ class Cube {
 class World {
     constructor() {
         this.cubes = [
-            new Cube(vec3.fromValues(0, 0, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(0, 0, 0), new vec3.fromValues(0.0, 0.0, 0.0)),
+            new Cube(vec3.fromValues(0, 2, 0), new vec3.fromValues(1.0, 1.0, 1.0)),
+            new Cube(vec3.fromValues(0, -2, 0), new vec3.fromValues(1.0, 1.0, 1.0)),
+            new Cube(vec3.fromValues(1, 0, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(2, 0, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(2, 1, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(2, 2, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            // new Cube(vec3.fromValues(2, -1, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(2, -2, 0), new vec3.fromValues(0.0, 1.0, 0.5)),
+            new Cube(vec3.fromValues(-1, 0, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            new Cube(vec3.fromValues(-2, 0, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            new Cube(vec3.fromValues(-2, 1, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            new Cube(vec3.fromValues(-2, 2, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            // new Cube(vec3.fromValues(-2, -1, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            new Cube(vec3.fromValues(-2, -2, 0), new vec3.fromValues(0.5, 1.0, 0.0)),
+            new Cube(vec3.fromValues(0, 0, 1), new vec3.fromValues(0.0, 0.5, 1.0)),
+            new Cube(vec3.fromValues(0, 0, 2), new vec3.fromValues(0.0, 0.5, 1.0)),
+            new Cube(vec3.fromValues(0, 1, 2), new vec3.fromValues(0.0, 0.5, 1.0)),
+            new Cube(vec3.fromValues(0, 2, 2), new vec3.fromValues(0.0, 0.5, 1.0)),
+            // new Cube(vec3.fromValues(0, -1, 2), new vec3.fromValues(0.0, 0.5, 1.0)),
+            new Cube(vec3.fromValues(0, -2, 2), new vec3.fromValues(0.0, 0.5, 1.0)),
+            new Cube(vec3.fromValues(0, 0, -1), new vec3.fromValues(1.0, 0.0, 0.5)),
+            new Cube(vec3.fromValues(0, 0, -2), new vec3.fromValues(1.0, 0.0, 0.5)),
+            new Cube(vec3.fromValues(0, 1, -2), new vec3.fromValues(1.0, 0.0, 0.5)),
+            new Cube(vec3.fromValues(0, 2, -2), new vec3.fromValues(1.0, 0.0, 0.5)),
+            // new Cube(vec3.fromValues(0, -1, -2), new vec3.fromValues(1.0, 0.0, 0.5)),
+            new Cube(vec3.fromValues(0, -2, -2), new vec3.fromValues(1.0, 0.0, 0.5)),
         ]
     }
 
