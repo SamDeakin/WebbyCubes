@@ -33,10 +33,12 @@ export class Camera {
             [0.0, 1.0, 0.0], // Up, always y direction
         )
 
+        // We specifically transform the ascension and distance at separate points
+        // because it feels more natural to use
         mat4.translate(
             out,
             out,
-            [0.0, this.ascension, this.distance],
+            [0.0, 0.0, this.distance],
         )
 
         mat4.rotate(
@@ -51,6 +53,12 @@ export class Camera {
             out,
             this.rotation * Math.PI / 180,
             [0.0, 0.1, 0.0],
+        )
+
+        mat4.translate(
+            out,
+            out,
+            [0.0, this.ascension, 0.0],
         )
 
         return out
