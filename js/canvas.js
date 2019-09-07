@@ -178,6 +178,8 @@ export default class GLCanvas {
 
         let perspectiveMatrix = this.camera.perspective
         let viewMatrix = this.camera.view
+        let viewInverseMatrix = mat4.create()
+        mat4.invert(viewInverseMatrix, viewMatrix)
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
 
@@ -196,7 +198,7 @@ export default class GLCanvas {
         // Clear the canvas before we start drawing on it.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
-        this.cubeRenderPass.run(now, delta, viewMatrix, perspectiveMatrix)
+        this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
@@ -210,7 +212,7 @@ export default class GLCanvas {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
-        this.quadRenderPass.run(now, delta, viewMatrix, perspectiveMatrix)
+        this.quadRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
     }
 
     loadData() {
@@ -264,14 +266,17 @@ export default class GLCanvas {
 
         this.cubeShaderProgramInfo = {
             program: this.cubeShaderProgram,
-            vertexLocation: 4, // gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
+            vertexLocation: 8, // gl.getAttribLocation(this.cubeShaderProgram, 'a_position'),
             worldLocation: 0, // gl.getAttribLocation(this.cubeShaderProgram, 'a_world'),
-            cubeidLocation: 5, // gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
-            faceidLocation: 6, // gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
-            colourLocation: 7, // gl.getAttribLocation(this.cubeShaderProgram, 'a_colour'),
-            normalLocation: 8, // gl.getAttribLocation(this.cubeShaderProgram, 'a_normal'),
+            worldInverseLocation: 4, // gl.getAttribLocation(this.cubeShaderProgram, 'a_world_inverse'),
+            cubeidLocation: 9, // gl.getAttribLocation(this.cubeShaderProgram, 'a_cube'),
+            faceidLocation: 10, // gl.getAttribLocation(this.cubeShaderProgram, 'a_face'),
+            colourLocation: 11, // gl.getAttribLocation(this.cubeShaderProgram, 'a_colour'),
+            normalLocation: 12, // gl.getAttribLocation(this.cubeShaderProgram, 'a_normal'),
             modelLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_model'),
+            modelInverseLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_model_inverse'),
             viewLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_view'),
+            viewInverseLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_view_inverse'),
             perspectiveLocation: gl.getUniformLocation(this.cubeShaderProgram, 'u_perspective'),
         }
 

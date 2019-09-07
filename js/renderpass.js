@@ -91,7 +91,7 @@ class RenderPass {
         this.shaderProgramInfo = shaderProgramInfo
     }
 
-    run(now, delta, viewData, perspectiveData) {
+    run(now, delta, viewData, viewInverseData, perspectiveData) {
         gl.useProgram(this.shaderProgramInfo.program)
 
         this.bindGLData()
@@ -103,11 +103,25 @@ class RenderPass {
                 this.modelData, // Initial uniform data
             )
         }
+        if (this.shaderProgramInfo.modelInverseLocation) {
+            this.modelInverseUniform = gl.uniformMatrix4fv(
+                this.shaderProgramInfo.modelInverseLocation,
+                false,
+                this.modelInverseData,
+            )
+        }
         if (this.shaderProgramInfo.viewLocation) {
             this.viewUniform = gl.uniformMatrix4fv(
                 this.shaderProgramInfo.viewLocation,
                 false,
                 viewData,
+            )
+        }
+        if (this.shaderProgramInfo.viewInverseLocation) {
+            this.viewInverseUniform = gl.uniformMatrix4fv(
+                this.shaderProgramInfo.viewInverseLocation,
+                false,
+                viewInverseData,
             )
         }
         if (this.shaderProgramInfo.perspectiveLocation) {
@@ -153,11 +167,15 @@ export class CubeRenderPass extends RenderPass {
             [0.5, 0.5, 0.5],
         )
 
+        this.modelInverseData = mat4.create()
+        mat4.invert(this.modelInverseData, this.modelData)
+
         this.indexBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeIndices), gl.STATIC_DRAW)
 
         this.worldTransformBuffer = gl.createBuffer()
+        this.worldInverseTransformBuffer = gl.createBuffer()
         this.colourBuffer = gl.createBuffer()
         this.cubeidBuffer = gl.createBuffer()
 
@@ -197,16 +215,22 @@ export class CubeRenderPass extends RenderPass {
 
         // Reset world positions
         this.worldData = new Float32Array(size * 16)
+        this.worldInverseData = new Float32Array(size * 16)
         // Fill worldData with matrix transforms for every position
         for (let i = 0; i < size; i++) {
             let transform = mat4.create()
             mat4.fromTranslation(transform, positions[i])
+            let inverse = mat4.create()
+            mat4.invert(inverse, transform)
             for (let j = 0; j < 16; j++) {
                 this.worldData[i * 16 + j] = transform[j]
+                this.worldInverseData[i * 16 + j] = transform[j]
             }
         }
         gl.bindBuffer(gl.ARRAY_BUFFER, this.worldTransformBuffer)
         gl.bufferData(gl.ARRAY_BUFFER, this.worldData, gl.DYNAMIC_DRAW, 0)
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.worldInverseTransformBuffer)
+        gl.bufferData(gl.ARRAY_BUFFER, this.worldInverseData, gl.DYNAMIC_DRAW, 0)
 
         // Reset colours
         this.colourData = new Float32Array(size * 3)
@@ -256,6 +280,20 @@ export class CubeRenderPass extends RenderPass {
         gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
         gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
         gl.enableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.worldInverseTransformBuffer)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldInverseLocation + 0, 4, gl.FLOAT, false, 64, 0)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldInverseLocation + 1, 4, gl.FLOAT, false, 64, 16)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldInverseLocation + 2, 4, gl.FLOAT, false, 64, 32)
+        gl.vertexAttribPointer(this.shaderProgramInfo.worldInverseLocation + 3, 4, gl.FLOAT, false, 64, 48)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldInverseLocation + 0, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldInverseLocation + 1, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldInverseLocation + 2, 1)
+        gl.vertexAttribDivisor(this.shaderProgramInfo.worldInverseLocation + 3, 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 0)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 1)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 2)
+        gl.enableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 3)
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
 
@@ -314,6 +352,10 @@ export class CubeRenderPass extends RenderPass {
         gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 1)
         gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 2)
         gl.disableVertexAttribArray(this.shaderProgramInfo.worldLocation + 3)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 0)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 1)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 2)
+        gl.disableVertexAttribArray(this.shaderProgramInfo.worldInverseLocation + 3)
         gl.disableVertexAttribArray(this.shaderProgramInfo.colourLocation)
         gl.disableVertexAttribArray(this.shaderProgramInfo.normalLocation)
         gl.disableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
