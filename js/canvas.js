@@ -453,7 +453,7 @@ export default class GLCanvas {
         let faceid = buf[3]
 
         if (this.controlbar.isDeleting) {
-            this.world.userDeleted(idvec)
+            this.world.userDeleted(idvec, faceid)
         } else {
             this.world.userAdded(idvec, faceid, this.controlbar.currentColour)
         }

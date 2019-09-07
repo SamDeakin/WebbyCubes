@@ -93,8 +93,11 @@ class World {
         ))
     }
 
-    userDeleted(idvec) {
+    userDeleted(idvec, face) {
         let id = DecodeIDs(idvec)
+
+        if (face == 255)
+            return // Special value for not-a-cube
 
         this.cubes.splice(id, 1)
     }
