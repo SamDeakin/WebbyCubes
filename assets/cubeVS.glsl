@@ -17,8 +17,14 @@ uniform mat4 u_model_inverse;
 out vec3 vertex_colour;
 out vec3 object_normal;
 out vec3 object_eye;
+out vec3 object_sun;
 out vec3 cubeid;
 out float faceid;
+
+// Our sun doesn't have any colour bias.
+// Let the user colour dominate the shading
+vec3 world_sun = normalize(vec3(0.5, 0.5, 0.5));
+// vec3 world_sun = vec3(0.0, 0.0, 1.0);
 
 void main() {
     mat4 modelview = u_view * a_world * u_model;
@@ -30,6 +36,8 @@ void main() {
     vec4 view_eye = vec4(view_pos.xyz * -1.0 / view_pos.w, 0.0);
     vec4 object_eye_pos = a_world_inverse * u_view_inverse * view_eye;
     object_eye = normalize(object_eye_pos.xyz);
+
+    object_sun = normalize((a_world_inverse * vec4(world_sun, 0.0)).xyz);
 
     cubeid = a_cube;
     faceid = a_face;
