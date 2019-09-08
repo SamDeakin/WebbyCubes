@@ -35,6 +35,7 @@ void main() {
     // Component weights don't need to add to 1.
     // The scene tends to look dark and underexposed so we weight these heigher.
     // These values are probably specific to the sun position.
+    // Note: the sun has no colour contribution.
     float total = ambient * 0.2 + diffuse * 0.6 + specular * 0.6;
     fragcolour = vec4(vertex_colour * total, 1.0);
 
