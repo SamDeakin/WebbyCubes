@@ -1,7 +1,7 @@
 import { World } from "./cubes.js"
 import {
     CubeRenderPass,
-    QuadRenderPass,
+    FXRenderPass,
 } from "./renderpasses/index.js"
 import { Camera } from "./camera.js"
 import { ControlBar } from "./controlbar.js"
@@ -215,7 +215,7 @@ export default class GLCanvas {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
-        this.quadRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
+        this.fxRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
     }
 
     loadData() {
@@ -301,21 +301,23 @@ export default class GLCanvas {
             gl.deleteShader(this.quadFS)
         }
 
-        this.quadShaderProgram = gl.createProgram()
-        gl.attachShader(this.quadShaderProgram, this.quadVS)
-        gl.attachShader(this.quadShaderProgram, this.quadFS)
-        gl.linkProgram(this.quadShaderProgram)
+        this.fxShaderProgram = gl.createProgram()
+        gl.attachShader(this.fxShaderProgram, this.quadVS)
+        gl.attachShader(this.fxShaderProgram, this.quadFS)
+        gl.linkProgram(this.fxShaderProgram)
 
-        if (!gl.getProgramParameter(this.quadShaderProgram, gl.LINK_STATUS)) {
-            console.log('Failed to link quadShaderProgram: ' + gl.getProgramInfoLog(this.quadShaderProgram))
-            gl.deleteProgram(this.quadShaderProgram)
+        if (!gl.getProgramParameter(this.fxShaderProgram, gl.LINK_STATUS)) {
+            console.log('Failed to link fxShaderProgram: ' + gl.getProgramInfoLog(this.fxShaderProgram))
+            gl.deleteProgram(this.fxShaderProgram)
         }
 
-        this.quadShaderProgramInfo = {
-            program: this.quadShaderProgram,
-            vertexLocation: 0, // gl.getAttribLocation(this.quadShaderProgram, 'a_position'),
-            uvLocation: 1, // gl.getAttribLocation(this.quadShaderProgram, 'a_uv'),
-            samperLocation: gl.getUniformLocation(this.quadShaderProgram, 'u_sampler'),
+        this.fxShaderProgramInfo = {
+            program: this.fxShaderProgram,
+            vertexLocation: 0, // gl.getAttribLocation(this.fxShaderProgram, 'a_position'),
+            uvLocation: 1, // gl.getAttribLocation(this.fxShaderProgram, 'a_uv'),
+            samperLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_sampler'),
+            blurredAreaLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_blurredArea'),
+            renderAreaLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_renderArea'),
         }
     }
 
@@ -428,9 +430,10 @@ export default class GLCanvas {
             this.world.ids,
         )
 
-        this.quadRenderPass = new QuadRenderPass(
-            this.quadShaderProgramInfo,
+        this.fxRenderPass = new FXRenderPass(
+            this.fxShaderProgramInfo,
             this.frameColourTexture,
+            this.canvas,
         )
 
         let last = performance.now()

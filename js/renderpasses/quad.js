@@ -80,3 +80,28 @@ export class QuadRenderPass extends RenderPass {
         gl.bindTexture(gl.TEXTURE_2D, null)
     }
 }
+
+export class FXRenderPass extends QuadRenderPass {
+    constructor(shaderProgramInfo, quadTexture, canvas) {
+        super(shaderProgramInfo, quadTexture)
+
+        this.controlbar = $("#controlbar")
+        this.canvas = canvas
+    }
+
+    bundGLData() {
+        super.bindGLData()
+
+        // Upload the height that must be blurred
+        const heightPercent = this.controlbar.height / this.canvas.height
+        this.blurredAreaUniform = gl.uniform1f(
+            this.shaderProgramInfo.blurredAreaLocation,
+            heightPercent,
+        )
+
+        this.renderAreaUniform = gl.uniform2fv(
+            this.shaderProgramInfo.renderAreaLocation,
+            [this.canvas.height, this.canvas.width,],
+        )
+    }
+}
