@@ -1,5 +1,8 @@
 import { World } from "./cubes.js"
-import { CubeRenderPass, QuadRenderPass } from "./renderpass.js"
+import {
+    CubeRenderPass,
+    QuadRenderPass,
+} from "./renderpasses/index.js"
 import { Camera } from "./camera.js"
 import { ControlBar } from "./controlbar.js"
 

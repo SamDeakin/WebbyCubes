@@ -1,3 +1,4 @@
+import { RenderPass } from './renderpass.js'
 
 const cubeData = [
     // Front face
@@ -66,87 +67,6 @@ const cubeNormals = [
     1.0, 0.0, 0.0, // Right face
     -1.0, 0.0, 0.0, // Left face
 ]
-
-const quadData = [
-    -1, -1, 0,
-    -1, 1, 0,
-    1, -1, 0,
-    1, 1, 0,
-]
-
-const quadIndices = [
-    1, 0, 2, // Bottom left
-    3, 2, 1, // Top right
-]
-
-const quaduvs = [
-    0, 0,
-    0, 1,
-    1, 0,
-    1, 1,
-]
-
-class RenderPass {
-    constructor(shaderProgramInfo) {
-        this.shaderProgramInfo = shaderProgramInfo
-    }
-
-    run(now, delta, viewData, viewInverseData, perspectiveData) {
-        gl.useProgram(this.shaderProgramInfo.program)
-
-        this.bindGLData()
-
-        if (this.shaderProgramInfo.modelLocation) {
-            this.modelUniform = gl.uniformMatrix4fv(
-                this.shaderProgramInfo.modelLocation, // The uniform location
-                false, // Whether to transpose the mat4, but true is unsupported lol
-                this.modelData, // Initial uniform data
-            )
-        }
-        if (this.shaderProgramInfo.modelInverseLocation) {
-            this.modelInverseUniform = gl.uniformMatrix4fv(
-                this.shaderProgramInfo.modelInverseLocation,
-                false,
-                this.modelInverseData,
-            )
-        }
-        if (this.shaderProgramInfo.viewLocation) {
-            this.viewUniform = gl.uniformMatrix4fv(
-                this.shaderProgramInfo.viewLocation,
-                false,
-                viewData,
-            )
-        }
-        if (this.shaderProgramInfo.viewInverseLocation) {
-            this.viewInverseUniform = gl.uniformMatrix4fv(
-                this.shaderProgramInfo.viewInverseLocation,
-                false,
-                viewInverseData,
-            )
-        }
-        if (this.shaderProgramInfo.perspectiveLocation) {
-            this.perspectiveUniform = gl.uniformMatrix4fv(
-                this.shaderProgramInfo.perspectiveLocation,
-                false,
-                perspectiveData,
-            )
-        }
-
-        gl.drawElementsInstanced(
-            gl.TRIANGLES, // Draw normal triangles
-            this.numVertices, // Number of vertices per instance
-            gl.UNSIGNED_SHORT, // Data format of the index buffer
-            0, // Start at the beginning of the buffer
-            this.instanceCount, // Number of cubes to draw
-        )
-
-        this.unbindGLData()
-
-        gl.useProgram(null)
-        gl.bindBuffer(gl.ARRAY_BUFFER, null)
-        gl.bindBuffer(gl.ARRAY_BUFFER, null)
-    }
-}
 
 export class CubeRenderPass extends RenderPass {
     constructor(shaderProgramInfo) {
@@ -360,67 +280,5 @@ export class CubeRenderPass extends RenderPass {
         gl.disableVertexAttribArray(this.shaderProgramInfo.normalLocation)
         gl.disableVertexAttribArray(this.shaderProgramInfo.cubeidLocation)
         gl.disableVertexAttribArray(this.shaderProgramInfo.faceidLocation)
-    }
-}
-
-export class QuadRenderPass extends RenderPass {
-    constructor(shaderProgramInfo, quadTexture) {
-        super(shaderProgramInfo)
-
-        this.quadTexture = quadTexture
-        this.numVertices = 6
-        this.instanceCount = 1
-
-        this.vertexBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quadData), gl.STATIC_DRAW)
-
-        this.uvBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(quaduvs), gl.STATIC_DRAW)
-
-        this.indexBuffer = gl.createBuffer()
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(quadIndices), gl.STATIC_DRAW)
-    }
-
-    bindGLData() {
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
-        gl.vertexAttribPointer(
-            this.shaderProgramInfo.vertexLocation,
-            3, // 3 floats per vertex
-            gl.FLOAT, // Vertices are defined with floats
-            false, // Don't normalize
-            0, // No padding between vertices
-            0, // Start at the beginning of the buffer
-        )
-        gl.vertexAttribDivisor(this.shaderProgramInfo.vertexLocation, 0)
-        gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
-
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer)
-        gl.vertexAttribPointer(
-            this.shaderProgramInfo.uvLocation,
-            2,
-            gl.FLOAT,
-            false,
-            0,
-            0,
-        )
-        gl.vertexAttribDivisor(this.shaderProgramInfo.uvLocation, 0)
-        gl.enableVertexAttribArray(this.shaderProgramInfo.uvLocation)
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
-
-        gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_2D, this.quadTexture)
-        gl.activeTexture(gl.TEXTURE0)
-        gl.bindTexture(gl.TEXTURE_2D, this.quadTexture)
-        gl.uniform1i(this.shaderProgramInfo.samplerLocation, 0)
-    }
-
-    unbindGLData() {
-        gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
-        gl.disableVertexAttribArray(this.shaderProgramInfo.uvLocation)
-        gl.bindTexture(gl.TEXTURE_2D, null)
     }
 }
