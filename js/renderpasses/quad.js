@@ -89,11 +89,11 @@ export class FXRenderPass extends QuadRenderPass {
         this.canvas = canvas
     }
 
-    bundGLData() {
+    bindGLData() {
         super.bindGLData()
 
         // Upload the height that must be blurred
-        const heightPercent = this.controlbar.height / this.canvas.height
+        const heightPercent = this.controlbar.height() / this.canvas.height
         this.blurredAreaUniform = gl.uniform1f(
             this.shaderProgramInfo.blurredAreaLocation,
             heightPercent,

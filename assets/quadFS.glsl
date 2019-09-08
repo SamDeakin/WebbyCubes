@@ -13,4 +13,10 @@ uniform vec2 u_renderArea;
 
 void main() {
     fragcolour = texture(u_sampler, texuv);
+
+    float height = 1.0 - texuv.y;
+    if (height > u_blurredArea)
+        return;
+
+    fragcolour = vec4(1.0, 0.0, 0.0, 1.0);
 }
