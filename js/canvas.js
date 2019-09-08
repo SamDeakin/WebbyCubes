@@ -8,12 +8,17 @@ import { ControlBar } from "./controlbar.js"
 
 const MouseMoveThreshold = 15 // Min to count as move instead of click
 const MouseComboMoveThreshold = 0.7 // If >x% of movement is in x or y axis then lock to just that type of dragging
+const FPSUpdateFrequency = 4 // Updates the FPS counter every x frames
 
 export default class GLCanvas {
     constructor() {
         this.canvas = document.querySelector("#main")
         this.width = 0
         this.height = 0
+
+        this.fps = document.querySelector("#fps")
+        this.frame = 0
+        this.frametime = 0
 
         this.camera = new Camera(
             // [0, 7, 15],
@@ -453,6 +458,14 @@ export default class GLCanvas {
             last = now
 
             _this.render(now, delta)
+
+            _this.frametime += delta
+            _this.frame++
+            if (_this.frame % FPSUpdateFrequency == 0) {
+                let fps = FPSUpdateFrequency / (_this.frametime * 0.001)
+                _this.fps.innerHTML = fps.toFixed(1)
+                _this.frametime = 0
+            }
 
             requestAnimationFrame(render)
         }
