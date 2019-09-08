@@ -18,10 +18,10 @@ void main() {
     // Our phong shading is modified this way because I dislike the look of 
     // simple flat ambient lighting.
     float eye_dot_normal = dot(object_eye, object_normal);
-    vec3 ambient = vertex_colour * (eye_dot_normal * 0.5 + 0.5);
+    float ambient = eye_dot_normal * 0.5 + 0.5;
 
     float sun_dot_normal = dot(object_sun, object_normal);
-    vec3 diffuse = vertex_colour * sun_dot_normal;
+    float diffuse = sun_dot_normal;
     // Diffuse lighting cannot "subtract" from the total, like when facing away.
     diffuse = max(diffuse, 0.0);
 
@@ -30,9 +30,13 @@ void main() {
     vec3 reflection = 2.0 * max(sun_dot_normal, 0.0) * object_normal - object_sun;
     reflection = max(reflection, 0.0);
     float reflection_dot_eye = max(dot(reflection, object_eye), 0.0);
-    vec3 specular = vertex_colour * reflection_dot_eye;
+    float specular = reflection_dot_eye;
 
-    fragcolour = vec4(ambient * 0.1 + diffuse * 0.5 + specular * 0.4, 1.0);
+    // Component weights don't need to add to 1.
+    // The scene tends to look dark and underexposed so we weight these heigher.
+    // These values are probably specific to the sun position.
+    float total = ambient * 0.2 + diffuse * 0.6 + specular * 0.6;
+    fragcolour = vec4(vertex_colour * total, 1.0);
 
     id = vec4(cubeid, faceid);
 }
