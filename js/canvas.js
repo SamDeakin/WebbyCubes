@@ -193,6 +193,11 @@ export default class GLCanvas {
         gl.cullFace(gl.BACK)
         gl.viewport(0, 0, this.width, this.height)
 
+        // Set colour texture to be drawn to
+        gl.bindTexture(gl.TEXTURE_2D, this.frameColourTexture)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
+
         gl.drawBuffers([
             gl.COLOR_ATTACHMENT0,
             gl.COLOR_ATTACHMENT1,
@@ -207,6 +212,11 @@ export default class GLCanvas {
 
         gl.disable(gl.DEPTH_TEST);
         gl.viewport(0, 0, this.width, this.height)
+
+        // Set colour texture to be read from
+        gl.bindTexture(gl.TEXTURE_2D, this.frameColourTexture)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
 
         gl.drawBuffers([
             gl.BACK,
