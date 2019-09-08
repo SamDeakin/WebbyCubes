@@ -333,6 +333,9 @@ export default class GLCanvas {
             samperLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_sampler'),
             blurredAreaLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_blurredArea'),
             renderAreaLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_renderArea'),
+            kernelSizeLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_size'),
+            kernelWeightsLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_weights'),
+            kernelDarkeningLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_darkening'),
         }
     }
 

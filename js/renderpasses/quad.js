@@ -81,12 +81,40 @@ export class QuadRenderPass extends RenderPass {
     }
 }
 
+function normalDist(x, sigma) {
+    let val = 1.0 / Math.sqrt(2.0 * Math.PI) * Math.exp(-0.5 * x * x / (sigma * sigma)) / sigma
+    console.log(x, sigma, val)
+    return val
+}
+
 export class FXRenderPass extends QuadRenderPass {
     constructor(shaderProgramInfo, quadTexture, canvas) {
         super(shaderProgramInfo, quadTexture)
 
         this.controlbar = $("#controlbar")
         this.canvas = canvas
+
+        this.kernelSize = 10
+        this.kernelData = new Float32Array(this.kernelSize + 1)
+        this.kernelDarkening = 0.80
+
+        // Initialize values
+        let sigma = 0.3
+        for (let i = 0; i < this.kernelSize + 1; i++) {
+            this.kernelData[i] = normalDist(i, sigma * this.kernelSize)
+        }
+
+        // Normalize the kernel
+        let total = 0
+        for (let i = -this.kernelSize; i <= this.kernelSize; i++) {
+            for (let j = -this.kernelSize; j <= this.kernelSize; j++) {
+                total += this.kernelData[Math.abs(i)] * this.kernelData[Math.abs(j)]
+            }
+        }
+        let length = Math.sqrt(total)
+        for (let i = 0; i < this.kernelSize + 1; i++) {
+            this.kernelData[i] /= length
+        }
     }
 
     bindGLData() {
@@ -102,6 +130,21 @@ export class FXRenderPass extends QuadRenderPass {
         this.renderAreaUniform = gl.uniform2fv(
             this.shaderProgramInfo.renderAreaLocation,
             [this.canvas.height, this.canvas.width,],
+        )
+
+        this.kernelSizeUniform = gl.uniform1i(
+            this.shaderProgramInfo.kernelSizeLocation,
+            this.kernelSize,
+        )
+
+        this.kernelWeightsUniform = gl.uniform1fv(
+            this.shaderProgramInfo.kernelWeightsLocation,
+            this.kernelData,
+        )
+
+        this.kernelDarkeningUniform = gl.uniform1f(
+            this.shaderProgramInfo.kernelDarkeningLocation,
+            this.kernelDarkening,
         )
     }
 }
