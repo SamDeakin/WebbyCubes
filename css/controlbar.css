@@ -7,9 +7,11 @@ html, body {
 }
 
 #controlbar {
-    top: 0;
+    top: 10px;
+    left: 10px;
+    right: 10px;
     position: fixed;
-    width: 100%;
+    /*width: 100% - 20px;*/
     background-color: rgba(0, 0, 0, 0);
     color: #F0F0F0;
 }
@@ -62,5 +64,5 @@ html, body {
 
 /* For the currently selected control */
 #controlbar .control.selected {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.4);
 }
