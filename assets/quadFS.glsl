@@ -27,6 +27,10 @@ void main() {
         return;
     }
 
+    // This will produce visual artifacts when too close to the edge of the texture.
+    // The only way to reliably solve this is to render more pixels than needed so there
+    // is data to sample there. Strategies like only sampling inside [0,1] don't help
+    // enough visually to be worth the branching speed penalty.
     vec3 totalColour = vec3(0.0);
     for (int i = -u_kernel_size; i <= u_kernel_size; i++) {
         for (int j = -u_kernel_size; j <= u_kernel_size; j++) {
