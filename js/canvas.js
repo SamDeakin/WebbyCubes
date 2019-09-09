@@ -25,6 +25,7 @@ export default class GLCanvas {
             // [0, 7, 15],
             [0, 0, 5],
             -1, // Moves the entire scene up or down, not the camera.
+            45, // Starting rotation
             this.width,
             this.height,
             SimFrequency,

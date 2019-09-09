@@ -1,9 +1,9 @@
 export class Camera {
-    constructor(startingPos, startingAscension, width, height, simrate) {
+    constructor(startingPos, startingAscension, startingRotation, width, height, simrate) {
         this.pos = startingPos
         this.distance = 0.0
         this.ascension = startingAscension
-        this.rotation = 0.0
+        this.rotation = startingRotation
         this.pan = 0.0
 
         this.generatePerspective(width, height)
