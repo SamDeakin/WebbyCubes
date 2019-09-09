@@ -177,7 +177,20 @@ export class Camera {
         this.dragging = true
     }
 
-    dragEnd() {
+    dragEnd(now, delta) {
+        if (!this.dragging)
+            return
+
+        if (delta > this.simrate * 2) {
+            // The user has stopped moving the mouse for a long time
+            // before releasing the button, signalling they do not want more
+            // movement.
+            this.ddistance = 0
+            this.dascension = 0
+            this.drotation = 0
+            this.dpan = 0
+        }
+
         this.dragging = false
     }
 }

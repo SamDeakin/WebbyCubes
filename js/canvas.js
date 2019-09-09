@@ -69,7 +69,11 @@ export default class GLCanvas {
                 _this.mouseClicked(mouse.x, mouse.y)
             }
 
-            this.camera.dragEnd()
+            let now = performance.now()
+            let delta = now - mouse.last
+            mouse.last = now
+
+            this.camera.dragEnd(now, delta)
 
             e.preventDefault()
         }, false)
@@ -77,7 +81,11 @@ export default class GLCanvas {
             mouse.held = false
             e.preventDefault()
 
-            this.camera.dragEnd()
+            let now = performance.now()
+            let delta = now - mouse.last
+            mouse.last = now
+
+            this.camera.dragEnd(now, delta)
         })
         this.canvas.addEventListener('mousemove', (e) => {
             if (!mouse.held) {
