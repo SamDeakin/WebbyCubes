@@ -83,7 +83,6 @@ export class QuadRenderPass extends RenderPass {
 
 function normalDist(x, sigma) {
     let val = 1.0 / Math.sqrt(2.0 * Math.PI) * Math.exp(-0.5 * x * x / (sigma * sigma)) / sigma
-    console.log(x, sigma, val)
     return val
 }
 
@@ -121,10 +120,18 @@ export class FXRenderPass extends QuadRenderPass {
         super.bindGLData()
 
         // Upload the height that must be blurred
-        const heightPercent = this.controlbar.height() / this.canvas.height
-        this.blurredAreaUniform = gl.uniform1f(
+        const height = this.controlbar.innerHeight()
+        const width = this.controlbar.innerWidth()
+        const position = this.controlbar.position()
+        const blurArea = [
+            position.left / this.canvas.width,
+            (position.top + height) / this.canvas.height,
+            (position.left + width) / this.canvas.width,
+            position.top / this.canvas.height,
+        ]
+        this.blurredAreaUniform = gl.uniform2fv(
             this.shaderProgramInfo.blurredAreaLocation,
-            heightPercent,
+            blurArea,
         )
 
         this.renderAreaUniform = gl.uniform2fv(
