@@ -120,6 +120,7 @@ export class Camera {
 
     doslide(distance) {
         this.distance += distance
+        this.distance = Math.min(this.distance, this.pos[2] - 0.5)
     }
 
     dragHorizontalSecondary(dx, now, delta) {
