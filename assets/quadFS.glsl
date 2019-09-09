@@ -36,12 +36,15 @@ void main() {
         for (int j = -u_kernel_size; j <= u_kernel_size; j++) {
             vec2 pos = texuv + vec2(i, j) / u_render_area;
             float weight = u_kernel_weights[abs(i)] * u_kernel_weights[abs(j)];
-            totalColour += texture(u_sampler, pos).xyz * weight;
+            // The exp (and log later) are for good colour blending. Colours should
+            // be combined on a logarithmic scale or you get weird dark borders between
+            // transitions.
+            totalColour += exp(texture(u_sampler, pos).xyz) * weight;
         }
     }
 
     // This darkening is what makes the effect actually work.
     // It doesn't look good without it.
-    vec3 finalColour = totalColour * u_kernel_darkening;
+    vec3 finalColour = log(totalColour) * u_kernel_darkening;
     fragcolour = vec4(finalColour, 1.0);
 }
