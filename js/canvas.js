@@ -9,6 +9,7 @@ import { ControlBar } from "./controlbar.js"
 const MouseMoveThreshold = 15 // Min to count as move instead of click
 const MouseComboMoveThreshold = 0.7 // If >x% of movement is in x or y axis then lock to just that type of dragging
 const FPSUpdateFrequency = 4 // Updates the FPS counter every x frames
+const SimFrequency = 1000 / 60 // Sim x times per second
 
 export default class GLCanvas {
     constructor() {
@@ -22,10 +23,11 @@ export default class GLCanvas {
 
         this.camera = new Camera(
             // [0, 7, 15],
-            [0, 1, 5],
-            [0, 1, 0],
+            [0, 0, 5],
+            -1, // Moves the entire scene up or down, not the camera.
             this.width,
             this.height,
+            SimFrequency,
         )
 
         let _this = this
@@ -55,6 +57,10 @@ export default class GLCanvas {
             mouse.draggingX = false
             mouse.draggingY = false
             mouse.button = e.buttons
+            mouse.last = performance.now()
+
+            this.camera.dragStart(mouse.last)
+
             e.preventDefault()
         }, false)
         this.canvas.addEventListener('mouseup', (e) => {
@@ -62,11 +68,16 @@ export default class GLCanvas {
             if (mouse.click) {
                 _this.mouseClicked(mouse.x, mouse.y)
             }
+
+            this.camera.dragEnd()
+
             e.preventDefault()
         }, false)
         this.canvas.addEventListener('mouseleave', (e) => {
             mouse.held = false
             e.preventDefault()
+
+            this.camera.dragEnd()
         })
         this.canvas.addEventListener('mousemove', (e) => {
             if (!mouse.held) {
@@ -105,14 +116,18 @@ export default class GLCanvas {
 
             mouse.click = false
 
+            let now = performance.now()
+            let delta = now - mouse.last
+            mouse.last = now
+
             if (mouse.draggingX && mouse.button == 1)
-                _this.mouseDraggedXPrimary(mouse.x, mouse.dx)
+                _this.mouseDraggedXPrimary(mouse.x, mouse.dx, now, delta)
             if (mouse.draggingY && mouse.button == 1)
-                _this.mouseDraggedYPrimary(mouse.y, mouse.dy)
+                _this.mouseDraggedYPrimary(mouse.y, mouse.dy, now, delta)
             if (mouse.draggingX && mouse.button == 2)
-                _this.mouseDraggedXSecondary(mouse.x, mouse.dx)
+                _this.mouseDraggedXSecondary(mouse.x, mouse.dx, now, delta)
             if (mouse.draggingY && mouse.button == 2)
-                _this.mouseDraggedYSecondary(mouse.y, mouse.dy)
+                _this.mouseDraggedYSecondary(mouse.y, mouse.dy, now, delta)
 
             mouse.dx = 0
             mouse.dy = 0
@@ -231,6 +246,10 @@ export default class GLCanvas {
 
         // Render texture to screen
         this.fxRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
+    }
+
+    sim(now, delta) {
+        this.camera.update(delta)
     }
 
     loadData() {
@@ -454,11 +473,11 @@ export default class GLCanvas {
             this.canvas,
         )
 
-        let last = performance.now()
+        let lastRender = performance.now()
         let _this = this
         function render(now) {
-            let delta = now - last
-            last = now
+            let delta = now - lastRender
+            lastRender = now
 
             _this.render(now, delta)
 
@@ -474,6 +493,17 @@ export default class GLCanvas {
         }
 
         requestAnimationFrame(render)
+
+        let lastSim = performance.now()
+        function sim() {
+            let now = performance.now()
+            let delta = now - lastSim
+            lastSim = now
+
+            _this.sim(now, delta)
+        }
+
+        setInterval(sim, SimFrequency)
     }
 
     /// Event handling functions
@@ -506,19 +536,19 @@ export default class GLCanvas {
         )
     }
 
-    mouseDraggedXPrimary(x, dx) {
-        this.camera.dragHorizontalPrimary(dx)
+    mouseDraggedXPrimary(x, dx, now, delta) {
+        this.camera.dragHorizontalPrimary(dx, now, delta)
     }
 
-    mouseDraggedYPrimary(y, dy) {
-        this.camera.dragVerticalPrimary(dy)
+    mouseDraggedYPrimary(y, dy, now, delta) {
+        this.camera.dragVerticalPrimary(dy, now, delta)
     }
 
-    mouseDraggedXSecondary(x, dx) {
-        this.camera.dragHorizontalSecondary(dx)
+    mouseDraggedXSecondary(x, dx, now, delta) {
+        this.camera.dragHorizontalSecondary(dx, now, delta)
     }
 
-    mouseDraggedYSecondary(y, dy) {
-        this.camera.dragVerticalSecondary(dy)
+    mouseDraggedYSecondary(y, dy, now, delta) {
+        this.camera.dragVerticalSecondary(dy, now, delta)
     }
 }

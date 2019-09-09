@@ -1,13 +1,21 @@
 export class Camera {
-    constructor(startingPos, startingTarget, width, height) {
+    constructor(startingPos, startingAscension, width, height, simrate) {
         this.pos = startingPos
-        this.target = startingTarget
         this.distance = 0.0
-        this.ascension = 0.0
+        this.ascension = startingAscension
         this.rotation = 0.0
         this.pan = 0.0
 
         this.generatePerspective(width, height)
+
+        // Movement params
+        this.ddistance = 0.0
+        this.dascension = 0.0
+        this.drotation = 0.0
+        this.dpan = 0.0
+
+        this.dragging = false
+        this.simrate = simrate
     }
 
     generatePerspective(width, height) {
@@ -26,10 +34,13 @@ export class Camera {
 
         // Build out by applying transformations
         // Do this per-frame to avoid building small math errors over time
+        // Note that initial target values other than 0 have unexpected results
+        // on the following transforms. Setting the other transform values
+        // results in a more predictable sequence.
         mat4.lookAt(
             out, // Data destination
             this.pos, // Position
-            this.target, // target
+            [0.0, 0.0, 0.0], // target
             [0.0, 1.0, 0.0], // Up, always y direction
         )
 
@@ -68,21 +79,105 @@ export class Camera {
         return this.perspectiveMatrix
     }
 
-    dragVerticalPrimary(dy) {
-        this.pan += dy * 0.03
-        this.pan = Math.min(this.pan, 179.9)
-        this.pan = Math.max(this.pan, -179.9)
+    dragVerticalPrimary(dy, now, delta) {
+        let pan = dy * 0.03
+        this.dopan(pan)
+
+        this.lastAction = now
+
+        this.dpan = pan * this.simrate / delta
     }
 
-    dragHorizontalPrimary(dx) {
-        this.rotation += (dx * 0.1) % 360.0
+    dopan(pan) {
+        this.pan += pan
+        this.pan = Math.min(this.pan, 89.9)
+        this.pan = Math.max(this.pan, -89.9)
     }
 
-    dragVerticalSecondary(dy) {
-        this.distance += dy * 0.005
+    dragHorizontalPrimary(dx, now, delta) {
+        let rotation = dx * 0.1
+        this.dorotate(rotation)
+
+        this.lastAction = now
+
+        // Translate to simrate
+        this.drotation = rotation * this.simrate / delta
     }
 
-    dragHorizontalSecondary(dx) {
-        this.ascension += dx * 0.002
+    dorotate(rotation) {
+        this.rotation += rotation
+        this.rotation %= 360.0
+    }
+
+    dragVerticalSecondary(dy, now, delta) {
+        let distance = dy * 0.005
+        this.doslide(distance)
+
+        this.lastAction = now
+
+        this.ddistance = distance * this.simrate / delta
+    }
+
+    doslide(distance) {
+        this.distance += distance
+    }
+
+    dragHorizontalSecondary(dx, now, delta) {
+        let ascension = dx * 0.002
+        this.doclimb(ascension)
+
+        this.lastAction = now
+
+        this.dascension = ascension * this.simrate / delta
+    }
+
+    doclimb(ascension) {
+        this.ascension += ascension
+    }
+
+    update(delta) {
+        if (this.dragging)
+            return
+
+        this.ddistance = this.ddistance * 0.95
+        this.dascension = this.dascension * 0.95
+        this.drotation = this.drotation * 0.95
+        this.dpan = this.dpan * 0.95
+
+        // Fall to 0 if below a threshold
+        if (Math.abs(this.ddistance) < 0.005)
+            this.ddistance = 0
+        else
+            this.doslide(this.ddistance)
+
+        if (Math.abs(this.dascension) < 0.002)
+            this.dascension = 0
+        else
+            this.doclimb(this.dascension)
+
+        if (Math.abs(this.drotation) < 0.1)
+            this.drotation = 0
+        else
+            this.dorotate(this.drotation)
+
+        if (Math.abs(this.dpan) < 0.03)
+            this.dpan = 0
+        else
+            this.dopan(this.dpan)
+    }
+
+    dragStart(now) {
+        this.ddistance = 0
+        this.dascension = 0
+        this.drotation = 0
+        this.dpan = 0
+
+        this.lastAction = now
+
+        this.dragging = true
+    }
+
+    dragEnd() {
+        this.dragging = false
     }
 }
