@@ -21,19 +21,20 @@ export class PlaneRenderPass extends RenderPass {
 
         // Shift the plane down by this value to match the bottom of the "0" row cubes,
         // and then be just a bit below it to avoid z-fighting.
-        let planeShiftValue = 0.5001
+        let planeShiftValue = 0.5
+        let zShiftValue = 0.0001
         this.planeData = [
             planeData[0][0] * planeMin[0],
-            planeData[0][1] - planeShiftValue,
+            planeData[0][1] - planeShiftValue - zShiftValue,
             planeData[0][2] * planeMin[1],
             planeData[1][0] * planeMax[0],
-            planeData[1][1] - planeShiftValue,
+            planeData[1][1] - planeShiftValue - zShiftValue,
             planeData[1][2] * planeMin[1],
             planeData[2][0] * planeMax[0],
-            planeData[2][1] - planeShiftValue,
+            planeData[2][1] - planeShiftValue - zShiftValue,
             planeData[2][2] * planeMax[1],
             planeData[3][0] * planeMin[0],
-            planeData[3][1] - planeShiftValue,
+            planeData[3][1] - planeShiftValue - zShiftValue,
             planeData[3][2] * planeMax[1],
         ]
         console.log(planeMin, planeMax, this.planeData)
@@ -61,9 +62,14 @@ export class PlaneRenderPass extends RenderPass {
         gl.enableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
     }
 
     unbindGLData() {
         gl.disableVertexAttribArray(this.shaderProgramInfo.vertexLocation)
+
+        gl.disable(gl.BLEND);
     }
 }

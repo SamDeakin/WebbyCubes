@@ -55,7 +55,7 @@ class World {
     userAdded(idvec, face, colour) {
         let id = DecodeIDs(idvec)
         
-        if (face == 255)
+        if (face >= 254)
             return // Special not-drawn number (also the same as the colour alpha clear value)
 
         // Determine the cube position

@@ -236,6 +236,18 @@ export default class GLCanvas {
         // Clear the canvas before we start drawing on it.
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
+        gl.drawBuffers([
+            gl.NONE,
+            gl.COLOR_ATTACHMENT1,
+        ])
+        gl.clearColor(0.0, 0.0, 0.0, 254.0 / 255.0)
+        gl.clear(gl.COLOR_BUFFER_BIT)
+
+        gl.drawBuffers([
+            gl.COLOR_ATTACHMENT0,
+            gl.COLOR_ATTACHMENT1,
+        ])
+
         this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
         this.planeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
 
@@ -577,6 +589,8 @@ export default class GLCanvas {
         idvec[1] = buf[1]
         idvec[2] = buf[2]
         let faceid = buf[3]
+
+        console.log(idvec, faceid)
 
         if (this.controlbar.isDeleting) {
             this.world.userDeleted(idvec, faceid)
