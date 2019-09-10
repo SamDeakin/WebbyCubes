@@ -1,6 +1,7 @@
 import { World } from "./cubes.js"
 import {
     CubeRenderPass,
+    PlaneRenderPass,
     FXRenderPass,
 } from "./renderpasses/index.js"
 import { Camera } from "./camera.js"
@@ -236,6 +237,7 @@ export default class GLCanvas {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
+        this.planeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
@@ -262,13 +264,15 @@ export default class GLCanvas {
     }
 
     loadData() {
-        let cubeVS = fetch('../assets/cubeVS.glsl')
-        let cubeFS = fetch('../assets/cubeFS.glsl')
-        let quadVS = fetch('../assets/quadVS.glsl')
-        let quadFS = fetch('../assets/quadFS.glsl')
-
         const _this = this
-        Promise.all([cubeVS, cubeFS, quadVS, quadFS]).then(resources => {
+        Promise.all([
+            fetch('../assets/cubeVS.glsl'),
+            fetch('../assets/cubeFS.glsl'),
+            fetch('../assets/quadVS.glsl'),
+            fetch('../assets/quadFS.glsl'),
+            fetch('../assets/planeVS.glsl'),
+            fetch('../assets/planeFS.glsl'),
+        ]).then(resources => {
             Promise.all(resources.map(res => {
                 return res.text()
             })).then(texts => {
@@ -276,6 +280,8 @@ export default class GLCanvas {
                 _this.cubeFSsource = texts[1]
                 _this.quadVSsource = texts[2]
                 _this.quadFSsource = texts[3]
+                _this.planeVSsource = texts[4]
+                _this.planeFSsource = texts[5]
                 _this.beginRender()
             })
         })
@@ -364,6 +370,42 @@ export default class GLCanvas {
             kernelSizeLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_size'),
             kernelWeightsLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_weights'),
             kernelDarkeningLocation: gl.getUniformLocation(this.fxShaderProgram, 'u_kernel_darkening'),
+        }
+
+        this.planeVS = gl.createShader(gl.VERTEX_SHADER)
+        gl.shaderSource(this.planeVS, this.planeVSsource)
+        gl.compileShader(this.planeVS)
+
+        if (!gl.getShaderParameter(this.planeVS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader planeVS: ' + gl.getShaderInfoLog(this.planeVS))
+            gl.deleteShader(this.planeVS)
+        }
+
+        this.planeFS = gl.createShader(gl.FRAGMENT_SHADER)
+        gl.shaderSource(this.planeFS, this.planeFSsource)
+        gl.compileShader(this.planeFS)
+
+        if (!gl.getShaderParameter(this.planeFS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader planeFS: ' + gl.getShaderInfoLog(this.planeFS))
+            gl.deleteShader(this.planeFS)
+        }
+
+        this.planeShaderProgram = gl.createProgram()
+        gl.attachShader(this.planeShaderProgram, this.planeVS)
+        gl.attachShader(this.planeShaderProgram, this.planeFS)
+        gl.linkProgram(this.planeShaderProgram)
+
+        if (!gl.getProgramParameter(this.planeShaderProgram, gl.LINK_STATUS)) {
+            console.log('Failed to link planeShaderProgram: ' + gl.getProgramInfoLog(this.planeShaderProgram))
+            gl.deleteProgram(this.planeShaderProgram)
+        }
+
+        this.planeShaderProgramInfo = {
+            program: this.planeShaderProgram,
+            vertexLocation: 0, // gl.getAttribLocation(this.planeShaderProgram, 'a_position'),
+            viewLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view'),
+            viewInverseLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view_inverse'),
+            perspectiveLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_perspective'),
         }
     }
 
@@ -474,6 +516,12 @@ export default class GLCanvas {
             this.world.positions,
             this.world.colours,
             this.world.ids,
+        )
+
+        this.planeRenderPass = new PlaneRenderPass(
+            this.planeShaderProgramInfo,
+            vec2.fromValues(-5, -5),
+            vec2.fromValues(5, 5),
         )
 
         this.fxRenderPass = new FXRenderPass(

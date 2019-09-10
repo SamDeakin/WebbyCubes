@@ -24,7 +24,6 @@ out float faceid;
 // Our sun doesn't have any colour bias.
 // Let the user colour dominate the shading
 vec3 world_sun = normalize(vec3(0.5, 0.5, 0.5));
-// vec3 world_sun = vec3(0.0, 0.0, 1.0);
 
 void main() {
     mat4 modelview = u_view * a_world * u_model;
