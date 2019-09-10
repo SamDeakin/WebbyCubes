@@ -17,15 +17,26 @@ float total(vec3 vector) {
     return vector.x + vector.y + vector.z;
 }
 
-void main() {
-    vec4 distance = fract(vec4(world_position - 0.5, world_position + 0.5));
-    vec4 low_distance = sign(max(distance_threshold - distance, 0.0));
-    vec4 high_distance = sign(max(distance - (1.0 - distance_threshold), 0.0));
+float total(vec2 vector) {
+    return vector.x + vector.y;
+}
 
-    float total_distance = total(high_distance) + total(low_distance);
+void main() {
+    vec2 distance = fract(world_position - 0.5);
+    vec2 low_distance = sign(max(distance_threshold - distance, 0.0));
+    vec2 high_distance = sign(max(distance - (1.0 - distance_threshold), 0.0));
+
+    float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
     fragcolour = vec4(1.0) * sign(total_distance);
+
+    // We encode the id for the current position a bit weirdly
+    // x and y are the absolute world position
+    vec3 idvec = vec3(abs(world_position), 0.0);
+    // z is a bitmask for whether x and y are above or below 0
+    ivec2 idz = max(-sign(ivec2(world_position)), 0);
+    idvec.z = float(idz.x + (idz.y << 1));
 
     // Here 255 is important because alpha blending is on for this pass
     // It allows us to write directly to x,y without blending.
-    id = vec4(255.0, 255.0, 0.0, 255.0);
+    id = vec4(idvec / 255.0, 255.0);
 }
