@@ -12,6 +12,20 @@ function DecodeIDs(vector) {
     return vector[0] + (vector[1] << 8) + (vector[2] << 16)
 }
 
+// Decodes a vector that contains an encoding of x,y coordinates
+function DecodePos(vector) {
+    let output = vec3.create()
+    output[0] = vector[0]
+    output[0] *= (-1) ** Math.sign(vector[2] & 0x1)
+
+    output[2] = vector[1]
+    output[2] *= (-1) ** Math.sign(vector[2] & 0x2)
+
+    output[1] = vector[2] & 0x4 ? -1 : 0
+
+    return output
+}
+
 class Cube {
     constructor(pos, colour) {
         this.pos = pos
@@ -53,11 +67,19 @@ class World {
     }
 
     userAdded(idvec, face, colour) {
-        let id = DecodeIDs(idvec)
+        if (face == 254)
+            return // Special not-drawn number
         
-        if (face == 255)
-            return // Special not-drawn number (also the same as the colour alpha clear value)
+        if (face == 255) {
+            let pos = DecodePos(idvec)
+            this.addCubeByPos(colour, pos)
+        } else {
+            let id = DecodeIDs(idvec)
+            this.addCubeByID(colour, id, face)
+        }
+    }
 
+    addCubeByID(colour, id, face) {
         // Determine the cube position
         let touchedPos = this.cubes[id].pos
         let newPos = [0, 0, 0]
@@ -93,10 +115,17 @@ class World {
         ))
     }
 
+    addCubeByPos(colour, pos) {
+        this.cubes.push(new Cube(
+            vec3.fromValues(pos[0], pos[1], pos[2]),
+            vec3.fromValues(colour[0], colour[1], colour[2]),
+        ))
+    }
+
     userDeleted(idvec, face) {
         let id = DecodeIDs(idvec)
 
-        if (face == 255)
+        if (face >= 254)
             return // Special value for not-a-cube
 
         this.cubes.splice(id, 1)
