@@ -25,7 +25,7 @@ void main() {
     // z is a bitmask for whether x and y are above or below 0
     // With one extra component to say whether we are looking from above or below
     // the plane.
-    ivec2 idz = max(-sign(ivec2(world_position)), 0);
+    ivec2 idz = max(-sign(ivec2(world_position - 0.5)), 0);
     int below = max(int(-sign(dot(object_eye, object_normal))), 0);
     idvec.z = float(idz.x + (idz.y << 1) + (below << 2));
 
