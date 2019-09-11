@@ -590,8 +590,6 @@ export default class GLCanvas {
         idvec[2] = buf[2]
         let faceid = buf[3]
 
-        console.log(idvec, faceid)
-
         if (this.controlbar.isDeleting) {
             this.world.userDeleted(idvec, faceid)
         } else {

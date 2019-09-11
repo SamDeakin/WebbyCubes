@@ -37,7 +37,6 @@ export class PlaneRenderPass extends RenderPass {
             planeData[3][1] - planeShiftValue - zShiftValue,
             planeData[3][2] * planeMax[1],
         ]
-        console.log(planeMin, planeMax, this.planeData)
 
         this.vertexBuffer = gl.createBuffer()
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
