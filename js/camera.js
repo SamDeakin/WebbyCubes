@@ -1,10 +1,19 @@
 export class Camera {
-    constructor(startingPos, startingAscension, startingRotation, width, height, simrate) {
+    constructor(
+        startingPos,
+        startingDistance,
+        startingAscension,
+        startingRotation,
+        startingPan,
+        width,
+        height,
+        simrate
+    ) {
         this.pos = startingPos
-        this.distance = 0.0
+        this.distance = startingDistance
         this.ascension = startingAscension
         this.rotation = startingRotation
-        this.pan = 0.0
+        this.pan = startingPan
 
         this.generatePerspective(width, height)
 
@@ -25,7 +34,7 @@ export class Camera {
             60.0 * Math.PI / 180.0, // Vertical FOV in radians
             width / height, // Aspect ratio
             0.1, // Near plane
-            100.0, // Far plane
+            1000.0, // Far plane
         )
     }
 

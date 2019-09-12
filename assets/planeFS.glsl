@@ -5,8 +5,11 @@ precision highp float;
 layout(location = 0) out vec4 fragcolour;
 layout(location = 1) out vec4 id;
 
+uniform vec2 u_viewport_size;
+
 in vec2 world_position;
 in vec3 object_eye;
+in float depth;
 
 vec3 object_normal = vec3(0.0, 1.0, 0.0);
 float distance_threshold = 0.015;
@@ -18,6 +21,15 @@ void main() {
 
     float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
     fragcolour = vec4(1.0) * sign(total_distance);
+
+    // // Determine width of one pixel at depth
+    // // vec3 point1 = vec3(gl_FragCoord.z
+    // fragcolour.z = gl_FragCoord.z / 1000.0;
+    // fragcolour.y = 1.0 / gl_FragCoord.w / 255.0;
+    // // Determine how much of pixel is within line
+    // // Alpha blend
+
+    // TODO Get second intersection point and compare to world_position
 
     // We encode the id for the current position a bit weirdly
     // x and y are the absolute world position

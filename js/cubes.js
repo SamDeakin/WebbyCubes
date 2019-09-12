@@ -23,6 +23,7 @@ function DecodePos(vector) {
 
     output[1] = vector[2] & 0x4 ? -1 : 0
 
+    console.log(vector, output)
     return output
 }
 

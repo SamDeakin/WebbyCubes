@@ -23,10 +23,11 @@ export default class GLCanvas {
         this.frametime = 0
 
         this.camera = new Camera(
-            // [0, 7, 15],
             [0, 0, 5],
+            -5, // Moves the camera back
             -1, // Moves the entire scene up or down, not the camera.
             45, // Starting rotation
+            34, // Pan down
             this.width,
             this.height,
             SimFrequency,
@@ -418,6 +419,7 @@ export default class GLCanvas {
             viewLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view'),
             viewInverseLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view_inverse'),
             perspectiveLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_perspective'),
+            viewportSizeLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_viewport_size'),
         }
     }
 
@@ -532,8 +534,9 @@ export default class GLCanvas {
 
         this.planeRenderPass = new PlaneRenderPass(
             this.planeShaderProgramInfo,
-            vec2.fromValues(-5, -5),
-            vec2.fromValues(5, 5),
+            vec2.fromValues(-100, -100),
+            vec2.fromValues(100, 100),
+            this.canvas,
         )
 
         this.fxRenderPass = new FXRenderPass(
@@ -554,7 +557,7 @@ export default class GLCanvas {
             _this.frame++
             if (_this.frame % FPSUpdateFrequency == 0) {
                 let fps = FPSUpdateFrequency / (_this.frametime * 0.001)
-                _this.fps.innerHTML = fps.toFixed(1)
+                // _this.fps.innerHTML = fps.toFixed(1)
                 _this.frametime = 0
             }
 

@@ -13,8 +13,10 @@ const planeIndices = [
 ]
 
 export class PlaneRenderPass extends RenderPass {
-    constructor(shaderProgramInfo, planeMin, planeMax) {
+    constructor(shaderProgramInfo, planeMin, planeMax, canvas) {
         super(shaderProgramInfo)
+
+        this.canvas = canvas
 
         this.numVertices = 6
         this.instanceCount = 1
@@ -64,6 +66,11 @@ export class PlaneRenderPass extends RenderPass {
 
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+        this.viewportSizeUniform = gl.uniform2fv(
+            this.shaderProgramInfo.viewportSizeLocation,
+            [this.canvas.width, this.canvas.height],
+        )
     }
 
     unbindGLData() {
