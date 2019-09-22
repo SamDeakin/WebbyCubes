@@ -5,16 +5,42 @@ precision highp float;
 layout(location = 0) out vec4 fragcolour;
 layout(location = 1) out vec4 id;
 
+uniform mat4 u_perspective_inverse;
+uniform mat4 u_view_inverse;
 uniform vec2 u_viewport_size;
 
 in vec2 world_position;
 in vec3 object_eye;
 
-// Extra sampling positions
-in vec2 world_position_2;
-
 vec3 object_normal = vec3(0.0, 1.0, 0.0);
 float distance_threshold = 0.015;
+
+// Extra data used to "supersample" the grid without actually supersampling
+in vec3 plane_point;
+in vec3 plane_normal;
+in vec3 line_point2;
+in vec4 camera_point;
+
+in vec3 test;
+in vec3 test2;
+
+vec2 calc_second_point() {
+    vec4 camera_point2 = camera_point;
+    float pixelWidth = 2.0 / (u_viewport_size.x);
+    camera_point2.x += pixelWidth;
+
+    // Project back, and take the 3D coords to get the algebraic eqn of a line
+    vec4 line_point1_4D = u_view_inverse * u_perspective_inverse * camera_point2;
+    vec3 line_point1 = line_point1_4D.xyz / line_point1_4D.w;
+    vec3 line_dir = line_point1 - line_point2;
+
+    // Intersect line with plane
+    float d = dot((plane_point - line_point1), plane_normal) / dot(line_dir, plane_normal);
+    vec3 intersection = d * line_dir + line_point1;
+
+    // Pass intersecting point
+    return = intersection.xz;
+}
 
 void main() {
     vec2 distance = fract(world_position - 0.5);
@@ -24,15 +50,17 @@ void main() {
     float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
     fragcolour = vec4(1.0) * sign(total_distance);
 
-    // // Determine width of one pixel at depth
-    // // vec3 point1 = vec3(gl_FragCoord.z
-    // fragcolour.z = gl_FragCoord.z / 1000.0;
-    // fragcolour.y = 1.0 / gl_FragCoord.w / 255.0;
-    // // Determine how much of pixel is within line
-    // // Alpha blend
-    fragcolour.x = world_position.x / 100.0;
-    fragcolour.y = world_position_2.x / 100.0;
-    fragcolour.z = abs(world_position.x - world_position_2.x) * 100.0;
+    // Nudge the camera one pixel over and see how far away on the plane that is
+    vec2 world_position_2 = calc_second_point();
+
+    // Determine how much of pixel is within line
+    // Alpha blend
+    fragcolour.x = world_position.y / 100.0;
+    fragcolour.y = world_position_2.y / 100.0;
+    fragcolour.z = length(world_position - world_position_2) * 100.0;
+    // fragcolour.xy = abs(world_position - world_position_2);
+    fragcolour.xy = world_position_2;
+    fragcolour.w = 1.0;
 
     // TODO Get second intersection point and compare to world_position
 
