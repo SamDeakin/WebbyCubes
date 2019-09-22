@@ -20,14 +20,11 @@ in vec3 plane_point;
 in vec3 plane_normal;
 in vec3 line_point2;
 in vec4 camera_point;
-float grid_expand_min = 0.1;
-float grid_expand_speed = 10.0;
-float grid_fade_min = 0.5;
+float grid_expand_speed = 30.0;
+float grid_expand_min = 3.0;
+float grid_fade_min = 0.1;
 float grid_fade_speed = 30.0;
-float grid_fade_value = 0.5;
-
-in vec3 test;
-in vec3 test2;
+float grid_fade_value = 0.0;
 
 vec2 get_plane_point(vec4 point) {
     // Project back, and take the 3D coords to get the algebraic eqn of a line
@@ -43,22 +40,10 @@ vec2 get_plane_point(vec4 point) {
     return intersection.xz;
 }
 
-// float on_grid(vec2 position) {
-//     vec2 distance = fract(position - 0.5);
-//     vec2 low_distance = sign(max(distance_threshold - distance, 0.0));
-//     vec2 high_distance = sign(max(distance - (1.0 - distance_threshold), 0.0));
-
-//     float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
-//     return sign(total_distance);
-// }
-
-float on_grid(vec2 position, float threshold) {
+float grid_distance(vec2 position) {
     vec2 distance = fract(position - 0.5);
-    vec2 low_distance = sign(max(threshold - distance, 0.0));
-    vec2 high_distance = sign(max(distance - (1.0 - threshold), 0.0));
-
-    float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
-    return sign(total_distance);
+    vec2 distance_inverse = 1.0 - distance;
+    return min(min(distance.x, distance.y), min(distance_inverse.x, distance_inverse.y));
 }
 
 void main() {
@@ -72,9 +57,13 @@ void main() {
     vec2 world_position_3 = get_plane_point(point3);
     float point_distance = distance(world_position_2, world_position_3);
 
-    float threshold_mod = max(point_distance * grid_expand_speed - grid_expand_min, 0.0);
-    float threshold = distance_threshold + threshold_mod;
-    float grid_intensity = on_grid(world_position, threshold);
+    // Closest distance to a side of the grid
+    float min_distance = grid_distance(world_position);
+
+    // Here, a value of 0 means on the grid, and we lerp towards transparent above 0
+    float distance_test = max(min_distance - distance_threshold, 0.0);
+    float distance_lerp = distance_test / pow(point_distance * grid_expand_speed, grid_expand_min);
+    float grid_intensity = mix(1.0, 0.0, distance_lerp);
 
     // Obscure and tend towards a flat alpha value as point_distance grows
     float lerp = clamp(point_distance * grid_fade_speed - grid_fade_min, 0.0, 1.0);
