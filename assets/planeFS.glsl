@@ -13,15 +13,15 @@ in vec2 world_position;
 in vec3 object_eye;
 
 vec3 object_normal = vec3(0.0, 1.0, 0.0);
-float distance_threshold = 0.015;
+float distance_threshold = 0.025;
 
 // Extra data used to "supersample" the grid without actually supersampling
 in vec3 plane_point;
 in vec3 plane_normal;
 in vec3 line_point2;
 in vec4 camera_point;
-float grid_expand_speed = 30.0;
-float grid_expand_min = 3.0;
+float grid_expand_speed = 100.0;
+float grid_expand_min = 15.0;
 float grid_fade_min = 0.1;
 float grid_fade_speed = 30.0;
 float grid_fade_value = 0.0;
@@ -60,15 +60,17 @@ void main() {
     // Closest distance to a side of the grid
     float min_distance = grid_distance(world_position);
 
-    // Here, a value of 0 means on the grid, and we lerp towards transparent above 0
-    float distance_test = max(min_distance - distance_threshold, 0.0);
-    float distance_lerp = distance_test / pow(point_distance * grid_expand_speed, grid_expand_min);
+    // Here, a value of 0 means on the grid, and we lerp towards transparent
+    // within fade_delta distance of 0
+    float distance_test = min_distance - distance_threshold;
+    float fade_delta = pow(point_distance * grid_expand_speed, grid_expand_min);
+    float distance_lerp = (distance_test + fade_delta) / fade_delta;
     float grid_intensity = mix(1.0, 0.0, distance_lerp);
 
     // Obscure and tend towards a flat alpha value as point_distance grows
     float lerp = clamp(point_distance * grid_fade_speed - grid_fade_min, 0.0, 1.0);
     float intensity = mix(grid_intensity, grid_fade_value, lerp);
-    fragcolour = vec4(vec3(1.0), 1.0 * intensity);
+    fragcolour = vec4(vec3(1.0), 1.0 * grid_intensity);
 
     // We encode the id for the current position a bit weirdly
     // x and y are the absolute world position
