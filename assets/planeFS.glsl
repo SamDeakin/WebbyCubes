@@ -9,7 +9,9 @@ uniform vec2 u_viewport_size;
 
 in vec2 world_position;
 in vec3 object_eye;
-in float depth;
+
+// Extra sampling positions
+in vec2 world_position_2;
 
 vec3 object_normal = vec3(0.0, 1.0, 0.0);
 float distance_threshold = 0.015;
@@ -28,6 +30,9 @@ void main() {
     // fragcolour.y = 1.0 / gl_FragCoord.w / 255.0;
     // // Determine how much of pixel is within line
     // // Alpha blend
+    fragcolour.x = world_position.x / 100.0;
+    fragcolour.y = world_position_2.x / 100.0;
+    fragcolour.z = abs(world_position.x - world_position_2.x) * 100.0;
 
     // TODO Get second intersection point and compare to world_position
 
