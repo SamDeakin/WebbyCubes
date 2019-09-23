@@ -23,7 +23,6 @@ function DecodePos(vector) {
 
     output[1] = vector[2] & 0x4 ? -1 : 0
 
-    console.log(vector, output)
     return output
 }
 
@@ -70,7 +69,7 @@ class World {
     userAdded(idvec, face, colour) {
         if (face == 254)
             return // Special not-drawn number
-        
+
         if (face == 255) {
             let pos = DecodePos(idvec)
             this.addCubeByPos(colour, pos)
