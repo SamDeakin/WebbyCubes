@@ -20,10 +20,13 @@ in vec3 plane_point;
 in vec3 plane_normal;
 in vec3 line_point2;
 in vec4 camera_point;
+// Tuning parameters to make the fade out look good
 float grid_expand_speed = 100.0;
 float grid_expand_min = 15.0;
-float grid_fade_min = 0.1;
+float grid_depth_speed = 0.02;
+float grid_depth_min = 0.0000001;
 float grid_fade_speed = 30.0;
+float grid_fade_min = 0.1;
 float grid_fade_value = 0.0;
 
 vec2 get_plane_point(vec4 point) {
@@ -49,11 +52,14 @@ float grid_distance(vec2 position) {
 void main() {
     // Nudge the camera one pixel over and see how far away on the plane that is
     vec2 pixel = 2.0 / u_viewport_size;
+    // We only nudge in one direction for just two samples
     vec4 point2 = camera_point;
-    point2.xy += pixel;
+    // point2.x += pixel.x;
+    point2.y += pixel.y;
     vec2 world_position_2 = get_plane_point(point2);
     vec4 point3 = camera_point;
-    point3.xy -= pixel;
+    // point3.x -= pixel.x;
+    point3.y -= pixel.y;
     vec2 world_position_3 = get_plane_point(point3);
     float point_distance = distance(world_position_2, world_position_3);
 
@@ -63,14 +69,31 @@ void main() {
     // Here, a value of 0 means on the grid, and we lerp towards transparent
     // within fade_delta distance of 0
     float distance_test = min_distance - distance_threshold;
-    float fade_delta = pow(point_distance * grid_expand_speed, grid_expand_min);
-    float distance_lerp = (distance_test + fade_delta) / fade_delta;
-    float grid_intensity = mix(1.0, 0.0, distance_lerp);
+    float grid_fade = pow(point_distance * grid_expand_speed, grid_expand_min);
+
+    // We also fade based on the depth
+    float grid_depth = distance(plane_point, line_point2);
+    float depth_lerp = clamp(grid_depth * grid_depth_speed - grid_depth_min, 0.0, 1.0);
+
+    float grid_lerp = clamp((distance_test + grid_fade) / grid_fade, 0.0, 1.0);
+    float grid_intensity = mix(1.0, 0.0, grid_lerp);
+    float depth_intensity = mix(grid_intensity, 0.0, depth_lerp);
 
     // Obscure and tend towards a flat alpha value as point_distance grows
     float lerp = clamp(point_distance * grid_fade_speed - grid_fade_min, 0.0, 1.0);
-    float intensity = mix(grid_intensity, grid_fade_value, lerp);
-    fragcolour = vec4(vec3(1.0), 1.0 * grid_intensity);
+    float intensity = mix(depth_intensity, grid_fade_value, lerp);
+    fragcolour = vec4(vec3(1.0), 1.0 * depth_intensity);
+
+    if (gl_FragCoord.x < u_viewport_size.x / 2.0) {
+        fragcolour.w = 1.0;
+        fragcolour.x = -grid_intensity;
+        fragcolour.y = depth_lerp;
+        fragcolour.z = grid_lerp;
+        // fragcolour.z = sqrt(dot(plane_point - line_point2, plane_point - line_point2)) / 100.0;
+        // fragcolour.x = world_position_2.y;
+        // fragcolour.y = world_position_3.y;
+        // fragcolour.z = point_distance * 100.0;
+    }
 
     // We encode the id for the current position a bit weirdly
     // x and y are the absolute world position

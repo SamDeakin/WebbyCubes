@@ -3,6 +3,7 @@
 layout(location = 0) in vec3 a_position;
 
 uniform mat4 u_perspective;
+uniform mat4 u_perspective_inverse;
 uniform mat4 u_view;
 uniform mat4 u_view_inverse;
 
@@ -23,9 +24,11 @@ void main() {
     vec4 view_eye_dir = vec4(view_pos.xyz * -1.0 / view_pos.w, 0.0);
     object_eye = normalize((u_view_inverse * view_eye_dir).xyz);
 
+    // An untransformed position
     camera_point = gl_Position;
-    vec4 view_eye_point = vec4(view_eye_dir.xyz, 1.0);
-    vec4 object_eye_point = u_view_inverse * view_eye_point;
+
+    vec4 view_eye_point = vec4(vec3(0.0), 1.0);
+    vec4 object_eye_point = u_view_inverse * u_perspective_inverse * view_eye_point;
     line_point2 = object_eye_point.xyz / object_eye_point.w;
 
     // Algebraic equation of a plane
