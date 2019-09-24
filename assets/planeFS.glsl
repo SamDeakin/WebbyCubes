@@ -11,9 +11,13 @@ uniform vec2 u_viewport_size;
 
 in vec2 world_position;
 in vec3 object_eye;
+in vec3 object_normal;
 
-vec3 object_normal = vec3(0.0, 1.0, 0.0);
+in vec3 perspective_eye;
+in vec3 perspective_normal;
+
 float distance_threshold = 0.025;
+float PI_BY_2 = 1.57079632679489661;
 
 float on_grid(vec2 position, float threshold) {
     vec2 distance = fract(position - 0.5);
@@ -24,7 +28,31 @@ float on_grid(vec2 position, float threshold) {
     return sign(total_distance);
 }
 
+// Calculate the 1-d gradient from the normal and eye direction
+// Assumes both are  normalized
+float gradient(vec2 normal, vec2 eye) {
+    float angle = acos(dot(eye, normal));
+    return cos(PI_BY_2 - angle);
+}
+
+float gradient(vec3 normal, vec3 eye) {
+    float angle = acos(dot(eye, normal));
+    return cos(PI_BY_2 - angle);
+}
+
 void main() {
+    // We transform the eye here because it doesn't seem to interpolate correctly
+    // if we do it in the VS
+    vec3 eye = perspective_eye * gl_FragCoord.w;
+
+    // Calculate 2d gradient at point
+    float dx = gradient(normalize(perspective_normal.xz), normalize(eye.xz));
+    float dy = gradient(normalize(perspective_normal.yz), normalize(eye.yz));
+    float dxy = gradient(perspective_normal, normalize(eye));
+
+    // Take max pixel width and expand so that the threshold is at least 1 pixel thick
+    // TODO
+
     float threshold = distance_threshold;
     float grid_intensity = on_grid(world_position, threshold);
     fragcolour = vec4(vec3(1.0), 1.0 * grid_intensity);
