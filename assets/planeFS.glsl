@@ -19,25 +19,14 @@ in vec3 perspective_normal;
 float distance_threshold = 0.025;
 float PI_BY_2 = 1.57079632679489661;
 
-float on_grid(vec2 position, float threshold) {
+float on_grid(vec2 position, float threshold, vec2 gradient) {
+    vec2 test = threshold + gradient;
     vec2 distance = fract(position - 0.5);
-    vec2 low_distance = sign(max(threshold - distance, 0.0));
-    vec2 high_distance = sign(max(distance - (1.0 - threshold), 0.0));
+    vec2 low_distance = sign(max(test - distance, 0.0));
+    vec2 high_distance = sign(max(distance - (1.0 - test), 0.0));
 
     float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
     return sign(total_distance);
-}
-
-// Calculate the 1-d gradient from the normal and eye direction
-// Assumes both are  normalized
-float gradient(vec2 normal, vec2 eye) {
-    float angle = acos(dot(eye, normal));
-    return cos(PI_BY_2 - angle);
-}
-
-float gradient(vec3 normal, vec3 eye) {
-    float angle = acos(dot(eye, normal));
-    return cos(PI_BY_2 - angle);
 }
 
 void main() {
@@ -45,17 +34,31 @@ void main() {
     // if we do it in the VS
     vec3 eye = perspective_eye * gl_FragCoord.w;
 
-    // Calculate 2d gradient at point
-    float dx = gradient(normalize(perspective_normal.xz), normalize(eye.xz));
-    float dy = gradient(normalize(perspective_normal.yz), normalize(eye.yz));
-    float dxy = gradient(perspective_normal, normalize(eye));
+    vec2 dx = dFdx(world_position);
+    vec2 dy = dFdy(world_position);
+    vec2 dxy = max(dx, dy);
 
     // Take max pixel width and expand so that the threshold is at least 1 pixel thick
+    // TODO Use the distance to the camera to calc this part
+    // vec2 pixelsize = (1.0 + dxy) * 2.0 / u_viewport_size;
+    // float maxpixelsize = max(pixelsize.x, pixelsize.y);// + dxy;
+    float maxpixelsize = max(max(dx.x, dx.y), max(dy.x, dy.y));
+
+    float threshold = max(distance_threshold, maxpixelsize);
+    float grid_intensity = on_grid(world_position, threshold, dxy);
+
+    // Fade out intensity as pixels grow in size
     // TODO
 
-    float threshold = distance_threshold;
-    float grid_intensity = on_grid(world_position, threshold);
     fragcolour = vec4(vec3(1.0), 1.0 * grid_intensity);
+
+    if (gl_FragCoord.x < u_viewport_size.x * 0.5) {
+        fragcolour = vec4(0.0);
+        fragcolour.a = 1.0;
+
+        // fragcolour.gb = dx;
+        fragcolour.gb = dy;
+    }
 
     // We encode the id for the current position a bit weirdly
     // x and y are the absolute world position
