@@ -119,7 +119,7 @@ export class Camera {
     }
 
     dragVerticalSecondary(dy, now, delta) {
-        let distance = dy * 0.005
+        let distance = dy * 0.01
         this.doslide(distance)
 
         this.lastAction = now
@@ -133,7 +133,7 @@ export class Camera {
     }
 
     dragHorizontalSecondary(dx, now, delta) {
-        let ascension = dx * 0.002
+        let ascension = dx * 0.005
         this.doclimb(ascension)
 
         this.lastAction = now
@@ -155,12 +155,12 @@ export class Camera {
         this.dpan = this.dpan * 0.95
 
         // Fall to 0 if below a threshold
-        if (Math.abs(this.ddistance) < 0.005)
+        if (Math.abs(this.ddistance) < 0.01)
             this.ddistance = 0
         else
             this.doslide(this.ddistance)
 
-        if (Math.abs(this.dascension) < 0.002)
+        if (Math.abs(this.dascension) < 0.005)
             this.dascension = 0
         else
             this.doclimb(this.dascension)
