@@ -1,4 +1,4 @@
-# WebbyCubes
+# [WebbyCubes](http://WebbyCubes.rivey.me)
 Create stuff with cubes in your web browser! Put the monocolour cubes together to create whatever you want!
 
 ## How to run
