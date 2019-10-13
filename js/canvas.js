@@ -3,6 +3,7 @@ import {
     CubeRenderPass,
     PlaneRenderPass,
     FXRenderPass,
+    SkyboxRenderPass,
 } from "./renderpasses/index.js"
 import { Camera } from "./camera.js"
 import { ControlBar } from "./controlbar.js"
@@ -243,7 +244,7 @@ export default class GLCanvas {
             gl.NONE,
             gl.COLOR_ATTACHMENT1,
         ])
-        gl.clearColor(0.0, 0.0, 0.0, 254.0 / 255.0)
+        gl.clearColor(0.0, 0.0, 0.0, 253.0 / 255.0)
         gl.clear(gl.COLOR_BUFFER_BIT)
 
         gl.drawBuffers([
@@ -251,6 +252,9 @@ export default class GLCanvas {
             gl.COLOR_ATTACHMENT1,
         ])
 
+        gl.cullFace(gl.FRONT)
+        this.skyboxRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
+        gl.cullFace(gl.BACK)
         this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
         this.planeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
 
@@ -287,6 +291,8 @@ export default class GLCanvas {
             fetch('../assets/quadFS.glsl'),
             fetch('../assets/planeVS.glsl'),
             fetch('../assets/planeFS.glsl'),
+            fetch('../assets/skyboxVS.glsl'),
+            fetch('../assets/skyboxFS.glsl'),
         ]).then(resources => {
             Promise.all(resources.map(res => {
                 return res.text()
@@ -297,6 +303,8 @@ export default class GLCanvas {
                 _this.quadFSsource = texts[3]
                 _this.planeVSsource = texts[4]
                 _this.planeFSsource = texts[5]
+                _this.skyboxVSsource = texts[6]
+                _this.skyboxFSsource = texts[7]
                 _this.beginRender()
             })
         })
@@ -424,6 +432,41 @@ export default class GLCanvas {
             perspectiveInverseLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_perspective_inverse'),
             viewportSizeLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_viewport_size'),
         }
+
+        this.skyboxVS = gl.createShader(gl.VERTEX_SHADER)
+        gl.shaderSource(this.skyboxVS, this.skyboxVSsource)
+        gl.compileShader(this.skyboxVS)
+
+        if (!gl.getShaderParameter(this.skyboxVS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader skyboxVS: ' + gl.getShaderInfoLog(this.skyboxVS))
+            gl.deleteShader(this.skyboxVS)
+        }
+
+        this.skyboxFS = gl.createShader(gl.FRAGMENT_SHADER)
+        gl.shaderSource(this.skyboxFS, this.skyboxFSsource)
+        gl.compileShader(this.skyboxFS)
+
+        if (!gl.getShaderParameter(this.skyboxFS, gl.COMPILE_STATUS)) {
+            console.log('Failed to compile shader skyboxFS: ' + gl.getShaderInfoLog(this.skyboxFS))
+            gl.deleteShader(this.skyboxFS)
+        }
+
+        this.skyboxShaderProgram = gl.createProgram()
+        gl.attachShader(this.skyboxShaderProgram, this.skyboxVS)
+        gl.attachShader(this.skyboxShaderProgram, this.skyboxFS)
+        gl.linkProgram(this.skyboxShaderProgram)
+
+        if (!gl.getProgramParameter(this.skyboxShaderProgram, gl.LINK_STATUS)) {
+            console.log('Failed to link skyboxShaderProgram: ' + gl.getProgramInfoLog(this.skyboxShaderProgram))
+            gl.deleteProgram(this.skyboxShaderProgram)
+        }
+
+        this.skyboxShaderProgramInfo = {
+            program: this.skyboxShaderProgram,
+            vertexLocation: 0, // gl.getAttribLocation(this.skyboxShaderProgram, 'a_position'),
+            viewLocation: gl.getUniformLocation(this.skyboxShaderProgram, 'u_view'),
+            perspectiveLocation: gl.getUniformLocation(this.skyboxShaderProgram, 'u_perspective'),
+        }
     }
 
     createFramebuffer() {
@@ -547,6 +590,10 @@ export default class GLCanvas {
             this.fxShaderProgramInfo,
             this.frameColourTexture,
             this.canvas,
+        )
+
+        this.skyboxRenderPass = new SkyboxRenderPass(
+            this.skyboxShaderProgramInfo,
         )
 
         let lastRender = performance.now()

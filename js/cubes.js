@@ -67,8 +67,8 @@ class World {
     }
 
     userAdded(idvec, face, colour) {
-        if (face == 254)
-            return // Special not-drawn number
+        if (face == 253 || face == 254)
+            return // Special no-placement numbers: 253 is clear colour and 254 is the skybox
 
         if (face == 255) {
             let pos = DecodePos(idvec)
