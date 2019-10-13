@@ -23,10 +23,11 @@ export default class GLCanvas {
         this.frametime = 0
 
         this.camera = new Camera(
-            // [0, 7, 15],
             [0, 0, 5],
+            -5, // Moves the camera back
             -1, // Moves the entire scene up or down, not the camera.
             45, // Starting rotation
+            34, // Pan down
             this.width,
             this.height,
             SimFrequency,
@@ -210,6 +211,8 @@ export default class GLCanvas {
         this.setupView()
 
         let perspectiveMatrix = this.camera.perspective
+        let perspectiveInverseMatrix = mat4.create()
+        mat4.invert(perspectiveInverseMatrix, perspectiveMatrix)
         let viewMatrix = this.camera.view
         let viewInverseMatrix = mat4.create()
         mat4.invert(viewInverseMatrix, viewMatrix)
@@ -248,8 +251,8 @@ export default class GLCanvas {
             gl.COLOR_ATTACHMENT1,
         ])
 
-        this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
-        this.planeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
+        this.cubeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
+        this.planeRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
@@ -268,7 +271,7 @@ export default class GLCanvas {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 
         // Render texture to screen
-        this.fxRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix)
+        this.fxRenderPass.run(now, delta, viewMatrix, viewInverseMatrix, perspectiveMatrix, perspectiveInverseMatrix)
     }
 
     sim(now, delta) {
@@ -418,6 +421,8 @@ export default class GLCanvas {
             viewLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view'),
             viewInverseLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_view_inverse'),
             perspectiveLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_perspective'),
+            perspectiveInverseLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_perspective_inverse'),
+            viewportSizeLocation: gl.getUniformLocation(this.planeShaderProgram, 'u_viewport_size'),
         }
     }
 
@@ -532,8 +537,9 @@ export default class GLCanvas {
 
         this.planeRenderPass = new PlaneRenderPass(
             this.planeShaderProgramInfo,
-            vec2.fromValues(-5, -5),
-            vec2.fromValues(5, 5),
+            vec2.fromValues(-100, -100),
+            vec2.fromValues(100, 100),
+            this.canvas,
         )
 
         this.fxRenderPass = new FXRenderPass(

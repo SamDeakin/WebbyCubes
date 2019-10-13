@@ -69,7 +69,7 @@ class World {
     userAdded(idvec, face, colour) {
         if (face == 254)
             return // Special not-drawn number
-        
+
         if (face == 255) {
             let pos = DecodePos(idvec)
             this.addCubeByPos(colour, pos)

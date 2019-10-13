@@ -1,10 +1,19 @@
 export class Camera {
-    constructor(startingPos, startingAscension, startingRotation, width, height, simrate) {
+    constructor(
+        startingPos,
+        startingDistance,
+        startingAscension,
+        startingRotation,
+        startingPan,
+        width,
+        height,
+        simrate
+    ) {
         this.pos = startingPos
-        this.distance = 0.0
+        this.distance = startingDistance
         this.ascension = startingAscension
         this.rotation = startingRotation
-        this.pan = 0.0
+        this.pan = startingPan
 
         this.generatePerspective(width, height)
 
@@ -25,7 +34,7 @@ export class Camera {
             60.0 * Math.PI / 180.0, // Vertical FOV in radians
             width / height, // Aspect ratio
             0.1, // Near plane
-            100.0, // Far plane
+            1000.0, // Far plane
         )
     }
 
@@ -110,7 +119,7 @@ export class Camera {
     }
 
     dragVerticalSecondary(dy, now, delta) {
-        let distance = dy * 0.005
+        let distance = dy * 0.01
         this.doslide(distance)
 
         this.lastAction = now
@@ -124,7 +133,7 @@ export class Camera {
     }
 
     dragHorizontalSecondary(dx, now, delta) {
-        let ascension = dx * 0.002
+        let ascension = dx * 0.005
         this.doclimb(ascension)
 
         this.lastAction = now
@@ -146,12 +155,12 @@ export class Camera {
         this.dpan = this.dpan * 0.95
 
         // Fall to 0 if below a threshold
-        if (Math.abs(this.ddistance) < 0.005)
+        if (Math.abs(this.ddistance) < 0.01)
             this.ddistance = 0
         else
             this.doslide(this.ddistance)
 
-        if (Math.abs(this.dascension) < 0.002)
+        if (Math.abs(this.dascension) < 0.005)
             this.dascension = 0
         else
             this.doclimb(this.dascension)

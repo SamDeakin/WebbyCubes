@@ -3,7 +3,7 @@ export class RenderPass {
         this.shaderProgramInfo = shaderProgramInfo
     }
 
-    run(now, delta, viewData, viewInverseData, perspectiveData) {
+    run(now, delta, viewData, viewInverseData, perspectiveData, perspectiveInverseData) {
         gl.useProgram(this.shaderProgramInfo.program)
 
         this.bindGLData()
@@ -41,6 +41,13 @@ export class RenderPass {
                 this.shaderProgramInfo.perspectiveLocation,
                 false,
                 perspectiveData,
+            )
+        }
+        if (this.shaderProgramInfo.perspectiveInverseLocation) {
+            this.perspectiveInverseUniform = gl.uniformMatrix4fv(
+                this.shaderProgramInfo.perspectiveInverseLocation,
+                false,
+                perspectiveInverseData,
             )
         }
 
