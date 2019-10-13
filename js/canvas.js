@@ -537,8 +537,9 @@ export default class GLCanvas {
 
         this.planeRenderPass = new PlaneRenderPass(
             this.planeShaderProgramInfo,
-            vec2.fromValues(-100, -100),
-            vec2.fromValues(100, 100),
+            // These values are large enough that the grid fades out before the edge
+            vec2.fromValues(-1000, -1000),
+            vec2.fromValues(1000, 1000),
             this.canvas,
         )
 
@@ -586,10 +587,10 @@ export default class GLCanvas {
         y = this.height - y // The texture is flipped vertically
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
         gl.readBuffer(gl.COLOR_ATTACHMENT1)
-        
+
         let buf = new Uint8Array(4)
         gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, buf)
-        
+
         let idvec = vec3.create()
         idvec[0] = buf[0]
         idvec[1] = buf[1]
