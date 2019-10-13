@@ -19,11 +19,10 @@ in vec3 perspective_normal;
 float distance_threshold = 0.025;
 float PI_BY_2 = 1.57079632679489661;
 
-float on_grid(vec2 position, float threshold, vec2 gradient) {
-    vec2 test = threshold + gradient;
+float on_grid(vec2 position, float threshold) {
     vec2 distance = fract(position - 0.5);
-    vec2 low_distance = sign(max(test - distance, 0.0));
-    vec2 high_distance = sign(max(distance - (1.0 - test), 0.0));
+    vec2 low_distance = sign(max(threshold - distance, 0.0));
+    vec2 high_distance = sign(max(distance - (1.0 - threshold), 0.0));
 
     float total_distance = low_distance.x + low_distance.y + high_distance.x + high_distance.y;
     return sign(total_distance);
@@ -34,28 +33,27 @@ void main() {
     // if we do it in the VS
     vec3 eye = perspective_eye * gl_FragCoord.w;
 
-    vec2 dx = dFdx(world_position);
-    vec2 dy = dFdy(world_position);
-    vec2 dxy = max(dx, dy);
+    vec2 dx = abs(dFdx(world_position));
+    vec2 dy = abs(dFdy(world_position));
+    float maxdxy = max(max(dx.x, dx.y), max(dy.x, dy.y));
 
-    // Take max pixel width and expand so that the threshold is at least 1 pixel thick
-    // TODO Use the distance to the camera to calc this part
-    // vec2 pixelsize = (1.0 + dxy) * 2.0 / u_viewport_size;
-    // float maxpixelsize = max(pixelsize.x, pixelsize.y);// + dxy;
-    float maxpixelsize = max(max(dx.x, dx.y), max(dy.x, dy.y));
+    // If dxy is larger than the threshold, then we expand the threshold to be dxy
+    // and add proportional opacity
+    float threshold = max(distance_threshold, maxdxy);
+    float difference = max(0.0, maxdxy - distance_threshold);
 
-    float threshold = max(distance_threshold, maxpixelsize);
-    float grid_intensity = on_grid(world_position, threshold, dxy);
+    float grid_intensity = on_grid(world_position, threshold);
 
-    // Fade out intensity as pixels grow in size
-    // TODO
+    // Modify the intensity proportionally so that a dx or dy of 1.0 or greater is opacity 0
+    float intensity_mod = difference / (1.0 - 2.0 * distance_threshold);
+    float intensity = max(grid_intensity - intensity_mod, 0.0);
 
-    fragcolour = vec4(vec3(1.0), 1.0 * grid_intensity);
+    fragcolour = vec4(vec3(1.0), 1.0 * intensity);
 
     if (gl_FragCoord.x < u_viewport_size.x * 0.5) {
         fragcolour = vec4(0.0);
         fragcolour.a = 1.0;
-
+        fragcolour.r = difference;
         // fragcolour.gb = dx;
         fragcolour.gb = dy;
     }
