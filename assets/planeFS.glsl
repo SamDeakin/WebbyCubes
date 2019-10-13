@@ -45,7 +45,7 @@ void main() {
 
     // Modify the intensity so that it is a value of 1.0 on grid when dx,dy < threshold
     // and scales down to 0.0 when dx,dy > threshold by more than the fadeout threshold
-    float maxdxy = max(max(dx.x, dx.y), max(dy.x, dy.y));
+    float maxdxy = max(length(dx), length(dy));
     float intensity_mod = min(1.0, max(0.0, maxdxy - distance_threshold) / gradient_fadeout_threshold);
     float intensity = mix(grid_intensity, 0.0, intensity_mod);
 
