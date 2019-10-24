@@ -465,6 +465,7 @@ export default class GLCanvas {
             program: this.skyboxShaderProgram,
             vertexLocation: 0, // gl.getAttribLocation(this.skyboxShaderProgram, 'a_position'),
             viewLocation: gl.getUniformLocation(this.skyboxShaderProgram, 'u_view'),
+            viewInverseLocation: gl.getUniformLocation(this.skyboxShaderProgram, 'u_view_inverse'),
             perspectiveLocation: gl.getUniformLocation(this.skyboxShaderProgram, 'u_perspective'),
         }
     }
