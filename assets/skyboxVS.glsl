@@ -15,5 +15,5 @@ void main() {
     vec4 view_pos = modelview * vec4(a_position, 1.0);
     gl_Position = u_perspective * view_pos;
 
-    world_direction = normalize(mat3(u_view_inverse) * view_pos.xyz);
+    world_direction = mat3(u_view_inverse) * view_pos.xyz;
 }
