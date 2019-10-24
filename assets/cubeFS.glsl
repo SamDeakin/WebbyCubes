@@ -15,7 +15,7 @@ layout(location = 1) out vec4 id;
 void main() {
     // Set the ambient colour to be brighter for more perpendicular surfaces
     // (With a min of half brightness for a parallel surface)
-    // Our phong shading is modified this way because I dislike the look of 
+    // Our phong shading is modified this way because I dislike the look of
     // simple flat ambient lighting.
     float eye_dot_normal = dot(object_eye, object_normal);
     float ambient = eye_dot_normal * 0.5 + 0.5;
@@ -36,7 +36,7 @@ void main() {
     // The scene tends to look dark and underexposed so we weight these heigher.
     // These values are probably specific to the sun position.
     // Note: the sun has no colour contribution.
-    float total = ambient * 0.2 + diffuse * 0.6 + specular * 0.6;
+    float total = ambient * 0.2 + diffuse * 0.7 + specular * 0.7;
     fragcolour = vec4(vertex_colour * total, 1.0);
 
     id = vec4(cubeid, faceid);
