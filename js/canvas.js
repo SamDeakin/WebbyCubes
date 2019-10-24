@@ -609,7 +609,7 @@ export default class GLCanvas {
             _this.frame++
             if (_this.frame % FPSUpdateFrequency == 0) {
                 let fps = FPSUpdateFrequency / (_this.frametime * 0.001)
-                // _this.fps.innerHTML = fps.toFixed(1)
+                _this.fps.innerHTML = fps.toFixed(1)
                 _this.frametime = 0
             }
 
